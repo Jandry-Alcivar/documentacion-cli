@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -316,7 +316,8 @@ export class UserListComponent implements OnInit {
     private userService: UserService,
     private departmentService: DepartmentService,
     private roleService: RoleService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -327,19 +328,19 @@ export class UserListComponent implements OnInit {
 
   loadUsers() {
     this.userService.getUsers().subscribe({
-      next: (res) => this.users = res
+      next: (res) => { this.users = res; this.cdr.detectChanges(); }
     });
   }
 
   loadDepartments() {
     this.departmentService.getDepartments().subscribe({
-      next: (res) => this.departments = res
+      next: (res) => { this.departments = res; this.cdr.detectChanges(); }
     });
   }
 
   loadRoles() {
     this.roleService.getRoles().subscribe({
-      next: (res) => this.roles = res.filter(r => r.isActive)
+      next: (res) => { this.roles = res.filter((r: any) => r.isActive); this.cdr.detectChanges(); }
     });
   }
 

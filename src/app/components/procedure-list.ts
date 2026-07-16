@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -401,7 +401,8 @@ export class ProcedureListComponent implements OnInit {
     private authService: AuthService,
     private procedureService: ProcedureService,
     private departmentService: DepartmentService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -418,7 +419,7 @@ export class ProcedureListComponent implements OnInit {
 
   loadProcedures() {
     this.procedureService.getProcedures(this.activeView).subscribe({
-      next: (res) => this.procedures = res
+      next: (res) => { this.procedures = res; this.cdr.detectChanges(); }
     });
   }
 
@@ -434,6 +435,7 @@ export class ProcedureListComponent implements OnInit {
         this.newAssignee = res.assigneeId;
         this.newStatus = res.status;
         this.showDetailDialog = true;
+        this.cdr.detectChanges();
 
         if (this.canManage()) {
           this.loadDepartmentUsers();
@@ -446,7 +448,7 @@ export class ProcedureListComponent implements OnInit {
     const deptId = this.authService.currentUser()?.department?.id;
     if (deptId) {
       this.departmentService.getDepartmentUsers(deptId).subscribe({
-        next: (res) => this.deptUsers = res
+        next: (res) => { this.deptUsers = res; this.cdr.detectChanges(); }
       });
     }
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -384,7 +384,8 @@ export class DocumentListComponent implements OnInit {
     private documentService: DocumentService,
     private catalogService: CatalogService,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -400,6 +401,7 @@ export class DocumentListComponent implements OnInit {
     this.catalogService.getDocumentTypes().subscribe({
       next: (res) => {
         this.docTypes = res;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -411,7 +413,7 @@ export class DocumentListComponent implements OnInit {
 
     if (this.activeTab === 'trash') {
       this.documentService.getTrash().subscribe({
-        next: (res) => this.documents = res
+        next: (res) => { this.documents = res; this.cdr.detectChanges(); }
       });
       return;
     }
@@ -429,6 +431,7 @@ export class DocumentListComponent implements OnInit {
     this.documentService.getDocuments(filters).subscribe({
       next: (res) => {
         this.documents = res;
+        this.cdr.detectChanges();
       }
     });
   }

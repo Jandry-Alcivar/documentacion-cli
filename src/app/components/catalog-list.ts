@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -489,7 +489,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-s>
               <tr>
-                <td class="font-semibold text-white">{{ s.name }}</td>
+                <td style="color: #1e293b; font-weight: 600;">{{ s.name }}</td>
                 <td class="text-center">
                   <button class="p-button p-button-text p-button-sm p-button-info" (click)="openSectionsConfig(s)" title="Configurar Secciones de este Sector">
                     <i class="pi pi-plus mr-1"></i> Secciones
@@ -524,7 +524,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-sec>
               <tr>
-                <td class="font-semibold text-white">{{ sec.name }}</td>
+                <td style="color: #1e293b; font-weight: 600;">{{ sec.name }}</td>
                 <td class="text-center">
                   <button class="p-button p-button-text p-button-danger p-button-sm" (click)="onDeleteSection(sec.id)" title="Eliminar Sección">
                     <i class="pi pi-trash mr-1"></i> Eliminar
@@ -909,7 +909,8 @@ export class CatalogListComponent implements OnInit {
     private roleService: RoleService,
     private catalogService: CatalogService,
     private http: HttpClient,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -925,31 +926,32 @@ export class CatalogListComponent implements OnInit {
 
   // --- API LOADERS ---
   loadDepartments() {
-    this.departmentService.getDepartments().subscribe({ next: (res) => this.departments = res });
+    this.departmentService.getDepartments().subscribe({ next: (res) => { this.departments = res; this.cdr.detectChanges(); } });
   }
   loadRoles() {
-    this.roleService.getRoles().subscribe({ next: (res) => this.roles = res });
+    this.roleService.getRoles().subscribe({ next: (res) => { this.roles = res; this.cdr.detectChanges(); } });
   }
   loadDocTypes() {
-    this.catalogService.getDocumentTypes().subscribe({ next: (res) => this.docTypes = res });
+    this.catalogService.getDocumentTypes().subscribe({ next: (res) => { this.docTypes = res; this.cdr.detectChanges(); } });
   }
   loadProcTypes() {
-    this.catalogService.getProcedureTypes().subscribe({ next: (res) => this.procTypes = res });
+    this.catalogService.getProcedureTypes().subscribe({ next: (res) => { this.procTypes = res; this.cdr.detectChanges(); } });
   }
   loadFileTypes() {
-    this.catalogService.getFileTypes().subscribe({ next: (res: any) => this.fileTypes = res });
+    this.catalogService.getFileTypes().subscribe({ next: (res: any) => { this.fileTypes = res; this.cdr.detectChanges(); } });
   }
   loadWarehouses() {
-    this.http.get<any[]>('http://localhost:3001/api/archives/warehouses').subscribe({ next: (res) => this.warehouses = res });
+    this.http.get<any[]>('http://localhost:3001/api/archives/warehouses').subscribe({ next: (res) => { this.warehouses = res; this.cdr.detectChanges(); } });
   }
   loadPeriods() {
-    this.http.get<any[]>('http://localhost:3001/api/archives/periods').subscribe({ next: (res) => this.periods = res });
+    this.http.get<any[]>('http://localhost:3001/api/archives/periods').subscribe({ next: (res) => { this.periods = res; this.cdr.detectChanges(); } });
   }
   loadFormatConfig() {
     this.http.get<any>('http://localhost:3001/api/config').subscribe({
       next: (res) => {
         if (res && res.margins) {
           this.formatConfig = res.margins;
+          this.cdr.detectChanges();
         }
       }
     });

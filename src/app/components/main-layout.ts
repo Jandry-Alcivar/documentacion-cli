@@ -27,9 +27,7 @@ import { AlertService } from '../services/alert.service.js';
             <h3>G-DOC</h3>
             <span>Gestión Documental</span>
           </div>
-        </div>
-
-        <nav class="sidebar-menu">
+        </div>        <nav class="sidebar-menu">
           <a routerLink="dashboard" routerLinkActive="active-link" class="menu-item">
             <i class="pi pi-chart-bar"></i>
             <span>Dashboard</span>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -68,10 +68,10 @@ import { DepartmentService } from '../services/department.service.js';
 
       <!-- Tabs Navigation -->
       <div class="tabs-container">
-        <button class="tab-btn" [class.active-tab]="activeTab === 'summary'" (click)="activeTab = 'summary'"><i class="pi pi-info-circle"></i> Resumen</button>
-        <button class="tab-btn" [class.active-tab]="activeTab === 'viewer'" (click)="activeTab = 'viewer'"><i class="pi pi-eye"></i> Visor</button>
-        <button class="tab-btn" [class.active-tab]="activeTab === 'timeline'" (click)="activeTab = 'timeline'"><i class="pi pi-map"></i> Recorrido (Timeline)</button>
-        <button class="tab-btn" [class.active-tab]="activeTab === 'actions'" (click)="activeTab = 'actions'" *ngIf="showWorkflows()"><i class="pi pi-cog"></i> Acciones</button>
+        <button class="tab-btn" [class.active-tab]="activeTab === 'summary'" (click)="changeTab('summary')"><i class="pi pi-info-circle"></i> Resumen</button>
+        <button class="tab-btn" [class.active-tab]="activeTab === 'viewer'" (click)="changeTab('viewer')"><i class="pi pi-eye"></i> Visor</button>
+        <button class="tab-btn" [class.active-tab]="activeTab === 'timeline'" (click)="changeTab('timeline')"><i class="pi pi-map"></i> Recorrido (Timeline)</button>
+        <button class="tab-btn" [class.active-tab]="activeTab === 'actions'" (click)="changeTab('actions')" *ngIf="showWorkflows()"><i class="pi pi-cog"></i> Acciones</button>
       </div>
 
       <!-- TAB CONTENT: RESUMEN -->
@@ -639,7 +639,8 @@ export class DocumentDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private messageService: MessageService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -649,10 +650,16 @@ export class DocumentDetailComponent implements OnInit {
     }
   }
 
+  changeTab(tab: string) {
+    this.activeTab = tab;
+    this.cdr.detectChanges();
+  }
+
   loadDocumentDetails(id: string) {
     this.documentService.getDocumentById(id).subscribe({
       next: (res) => {
         this.document = res;
+        this.cdr.detectChanges();
         this.loadWorkflowContext();
       },
       error: (err) => {

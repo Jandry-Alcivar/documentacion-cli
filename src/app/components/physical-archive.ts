@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -60,7 +60,9 @@ import { ProcedureService } from '../services/procedure.service.js';
                 <td>{{ proc.applicantName }}</td>
                 <td>{{ proc.updatedAt | date:'short' }}</td>
                 <td class="text-center">
-                  <button pButton label="Archivar Físico" icon="pi pi-box" class="p-button-sm p-button-success" (click)="openArchiveDialog(proc)"></button>
+                  <button class="btn-action btn-success" (click)="openArchiveDialog(proc)">
+                    <i class="pi pi-box"></i> Archivar Físico
+                  </button>
                 </td>
               </tr>
             </ng-template>
@@ -97,7 +99,9 @@ import { ProcedureService } from '../services/procedure.service.js';
                 <td>{{ proc.section?.name }}</td>
                 <td class="font-mono text-indigo font-semibold">{{ proc.folderCode }}</td>
                 <td class="text-center">
-                  <button pButton icon="pi pi-refresh" class="p-button-text p-button-danger p-button-sm" (click)="revertFinalization(proc.id)"></button>
+                  <button class="btn-action btn-danger" (click)="revertFinalization(proc.id)">
+                    <i class="pi pi-refresh"></i> Revertir
+                  </button>
                 </td>
               </tr>
             </ng-template>
@@ -108,7 +112,9 @@ import { ProcedureService } from '../services/procedure.service.js';
             </ng-template>
           </p-table>
         </div>
-      <!-- DIÁLOGO: ASOCIAR LOCALIZACIÓN FÍSICA -->
+      </div>
+
+      <!-- DIÁLOGO: ASOCIAR LOCALIZACIÓN FÍSICA (siempre en el DOM) -->
       <p-dialog header="Registrar Ubicación Física del Expediente" [(visible)]="showArchiveDialog" [modal]="true" [style]="{width: '500px'}" appendTo="body">
         <div class="dialog-form" *ngIf="selectedProc">
           <p class="mb-2">Asigne la localización física del trámite: <strong>{{ selectedProc.code }}</strong></p>
@@ -134,8 +140,12 @@ import { ProcedureService } from '../services/procedure.service.js';
           </div>
           
           <div class="dialog-actions mt-4 flex justify-content-end gap-2">
-            <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="showArchiveDialog = false"></button>
-            <button pButton label="Guardar Ubicación y Archivar" icon="pi pi-check" class="p-button-success" [disabled]="!archiveForm.warehouseId || !archiveForm.sectorId || !archiveForm.sectionId || !archiveForm.folderCode" (click)="saveArchive()"></button>
+            <button class="btn-action btn-cancel" (click)="showArchiveDialog = false">
+              <i class="pi pi-times"></i> Cancelar
+            </button>
+            <button class="btn-action btn-success" [disabled]="!archiveForm.warehouseId || !archiveForm.sectorId || !archiveForm.sectionId || !archiveForm.folderCode" (click)="saveArchive()">
+              <i class="pi pi-check"></i> Guardar Ubicación y Archivar
+            </button>
           </div>
         </div>
       </p-dialog>
@@ -220,6 +230,26 @@ import { ProcedureService } from '../services/procedure.service.js';
     .text-indigo { color: #818cf8; }
     .text-center { text-align: center; }
 
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.75rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-action:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-action:active { transform: translateY(0); }
+    .btn-success { background: #22c55e; color: #fff; }
+    .btn-danger  { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .btn-cancel  { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+
+
     /* Dialog styling */
     .dialog-form {
       display: flex;
@@ -259,7 +289,8 @@ export class PhysicalArchiveComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private procedureService: ProcedureService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -271,19 +302,19 @@ export class PhysicalArchiveComponent implements OnInit {
   loadPendingProcedures() {
     // Trámites en estado FINALIZADO
     this.procedureService.getProcedures('all').subscribe({
-      next: (res) => this.pendingProcedures = res.filter(p => p.status === 'FINALIZADO')
+      next: (res) => { this.pendingProcedures = res.filter((p: any) => p.status === 'FINALIZADO'); this.cdr.detectChanges(); }
     });
   }
 
   loadArchivedProcedures() {
     this.http.get<any[]>('http://localhost:3001/api/archives/list').subscribe({
-      next: (res) => this.archivedProcedures = res
+      next: (res) => { this.archivedProcedures = res; this.cdr.detectChanges(); }
     });
   }
 
   loadWarehouses() {
     this.http.get<any[]>('http://localhost:3001/api/archives/warehouses').subscribe({
-      next: (res) => this.warehouses = res
+      next: (res) => { this.warehouses = res; this.cdr.detectChanges(); }
     });
   }
 
@@ -318,6 +349,7 @@ export class PhysicalArchiveComponent implements OnInit {
       folderCode: ''
     };
     this.showArchiveDialog = true;
+    this.cdr.detectChanges();
   }
 
   saveArchive() {

@@ -154,9 +154,10 @@ import { DocumentService } from '../services/document.service.js';
                   styleClass="w-full form-dropdown"
                   appendTo="body"
                   (onChange)="onDeptChange()"
+                  [disabled]="activeWorkflow !== null && activeWorkflow.nodes && activeWorkflow.nodes.length > 0"
                 ></p-select>
-                <small class="help-text" style="color: #818cf8;" *ngIf="activeWorkflow && activeWorkflow.nodes && activeWorkflow.nodes.length > 0">
-                  <i class="pi pi-info-circle"></i> Área inicial recomendada por el flujo.
+                <small class="help-text" style="color: #94a3b8;" *ngIf="activeWorkflow && activeWorkflow.nodes && activeWorkflow.nodes.length > 0">
+                  <i class="pi pi-lock"></i> El departamento destino está fijado por el flujo de este trámite.
                 </small>
               </div>
 

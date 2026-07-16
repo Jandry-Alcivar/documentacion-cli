@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Card } from 'primeng/card';
@@ -407,16 +407,27 @@ export class DashboardComponent implements OnInit {
     private authService: AuthService,
     private catalogService: CatalogService,
     private procedureService: ProcedureService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private cdr: ChangeDetectorRef
   ) {
     this.currentUser = this.authService.currentUser;
   }
 
   ngOnInit() {
+    // Intentar cargar inmediatamente
     if (this.isAdmin()) {
       this.loadAdminStats();
-    } else {
-      this.loadUserStats();
+    } else if (this.authService.isLoggedIn()) {
+      // Si el usuario está logueado pero el signal aun no se resolvió,
+      // esperar un tick para que Angular inicialice el signal correctamente
+      setTimeout(() => {
+        if (this.isAdmin()) {
+          this.loadAdminStats();
+        } else {
+          this.loadUserStats();
+        }
+        this.cdr.detectChanges();
+      }, 0);
     }
   }
 
@@ -434,10 +445,12 @@ export class DashboardComponent implements OnInit {
           documentsByStatus: res.stats.documentsByStatus,
           auditLogs: res.auditLogs
         };
+        this.cdr.detectChanges();
         // Sobrescribir con el conteo real desde el endpoint de alertas
         this.alertService.getAlerts().subscribe({
           next: (alerts) => {
             this.adminStats = { ...this.adminStats, totalAlerts: alerts.length };
+            this.cdr.detectChanges();
           }
         });
       },
@@ -447,6 +460,7 @@ export class DashboardComponent implements OnInit {
         this.alertService.getAlerts().subscribe({
           next: (alerts) => {
             this.adminStats = { ...this.adminStats, totalAlerts: alerts.length };
+            this.cdr.detectChanges();
           }
         });
       }
@@ -457,6 +471,7 @@ export class DashboardComponent implements OnInit {
     this.procedureService.getInboxCounts().subscribe({
       next: (res) => {
         this.userStats = res;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading user stats', err);
