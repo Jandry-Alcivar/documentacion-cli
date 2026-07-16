@@ -63,6 +63,14 @@ export const routes: Routes = [
       {
         path: 'reports',
         loadComponent: () => import('./components/report-list.js').then(m => m.ReportListComponent)
+      },
+      {
+        path: 'workflow-designer',
+        loadComponent: () => import('./components/workflow-designer.js').then(m => m.WorkflowDesignerComponent)
+      },
+      {
+        path: 'physical-archive',
+        loadComponent: () => import('./components/physical-archive.js').then(m => m.PhysicalArchiveComponent)
       }
     ]
   },

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
-import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { Dialog } from 'primeng/dialog';
 import { Toast } from 'primeng/toast';
@@ -20,7 +19,6 @@ import { DepartmentService } from '../services/department.service.js';
     RouterLink,
     FormsModule,
     TableModule,
-    Button,
     Select,
     Dialog,
     Toast
@@ -95,12 +93,13 @@ import { DepartmentService } from '../services/department.service.js';
                 </span>
               </td>
               <td class="text-center">
-                  <p-button 
-                    icon="pi pi-info-circle" 
-                    styleClass="p-button-rounded p-button-text p-button-info" 
+                  <button 
+                    class="p-button p-button-rounded p-button-text p-button-info" 
                     (click)="showDetail(proc.id)"
                     title="Ver Detalles"
-                  ></p-button>
+                  >
+                    <i class="pi pi-info-circle" style="font-size: 1.15rem;"></i>
+                  </button>
               </td>
             </tr>
           </ng-template>
@@ -118,9 +117,9 @@ import { DepartmentService } from '../services/department.service.js';
         [(visible)]="showDetailDialog" 
         [modal]="true" 
         [style]="{width: '650px'}"
-        *ngIf="selectedProcedure"
+        appendTo="body"
       >
-        <div class="proc-detail-content">
+        <div class="proc-detail-content" *ngIf="selectedProcedure">
           <div class="proc-header-meta">
             <h2>{{ selectedProcedure.code }}</h2>
             <span class="status-badge" [ngClass]="getStatusClass(selectedProcedure.status)">{{ selectedProcedure.status }}</span>
@@ -188,6 +187,7 @@ import { DepartmentService } from '../services/department.service.js';
                   optionValue="id"
                   placeholder="Selecciona empleado"
                   styleClass="w-full"
+                  appendTo="body"
                 ></p-select>
               </div>
               <div class="admin-field">
@@ -197,15 +197,16 @@ import { DepartmentService } from '../services/department.service.js';
                   [(ngModel)]="newStatus" 
                   placeholder="Selecciona estado"
                   styleClass="w-full"
+                  appendTo="body"
                 ></p-select>
               </div>
             </div>
-            <p-button 
-              label="Guardar Cambios Administrativos" 
-              icon="pi pi-save" 
-              styleClass="p-button-success w-full mt-3"
+            <button 
+              class="p-button p-button-success w-full mt-3"
               (click)="onSaveChanges()"
-            ></p-button>
+            >
+              <i class="pi pi-save mr-2"></i> Guardar Cambios Administrativos
+            </button>
           </div>
         </div>
       </p-dialog>

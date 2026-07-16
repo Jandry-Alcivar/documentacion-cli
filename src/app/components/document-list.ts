@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
-import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { MessageService } from 'primeng/api';
@@ -20,7 +19,6 @@ import { CatalogService } from '../services/catalog.service.js';
     RouterLink,
     FormsModule,
     TableModule,
-    Button,
     InputText,
     Select,
     Toast
@@ -133,13 +131,14 @@ import { CatalogService } from '../services/catalog.service.js';
               <td>
                 <div class="action-buttons">
                   <!-- Detalle -->
-                  <p-button 
+                  <button 
                     *ngIf="activeTab !== 'trash'"
-                    icon="pi pi-eye" 
-                    styleClass="p-button-rounded p-button-text p-button-info" 
+                    class="p-button p-button-rounded p-button-text p-button-info" 
                     title="Ver Detalles"
                     (click)="viewDetail(doc.id)"
-                  ></p-button>
+                  >
+                    <i class="pi pi-eye" style="font-size: 1.15rem;"></i>
+                  </button>
                   
                   <!-- Descarga de archivo -->
                   <a 
@@ -153,21 +152,23 @@ import { CatalogService } from '../services/catalog.service.js';
                   </a>
 
                   <!-- Restaurar (Papelera) -->
-                  <p-button 
+                  <button 
                     *ngIf="activeTab === 'trash'"
-                    icon="pi pi-refresh" 
-                    styleClass="p-button-rounded p-button-text p-button-success" 
+                    class="p-button p-button-rounded p-button-text p-button-success" 
                     title="Restaurar"
                     (click)="onRestore(doc.id)"
-                  ></p-button>
+                  >
+                    <i class="pi pi-refresh" style="font-size: 1.15rem;"></i>
+                  </button>
 
                   <!-- Enviar a Papelera / Eliminar -->
-                  <p-button 
-                    icon="pi pi-trash" 
-                    styleClass="p-button-rounded p-button-text p-button-danger" 
+                  <button 
+                    class="p-button p-button-rounded p-button-text p-button-danger" 
                     title="Eliminar"
                     (click)="onDelete(doc.id)"
-                  ></p-button>
+                  >
+                    <i class="pi pi-trash" style="font-size: 1.15rem;"></i>
+                  </button>
                 </div>
               </td>
             </tr>
