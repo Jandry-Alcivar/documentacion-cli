@@ -33,13 +33,13 @@ import { DepartmentService } from '../services/department.service.js';
           <h1>Control de Trámites y Procesos</h1>
           <p>Supervisa el estado y asignación de expedientes administrativos e institucionales</p>
         </div>
-        <p-button 
+        <button 
           *ngIf="canCreate()"
-          label="Iniciar Trámite" 
-          icon="pi pi-plus" 
-          styleClass="p-button-primary btn-create"
+          class="p-button p-button-primary btn-create"
           routerLink="create"
-        ></p-button>
+        >
+          <i class="pi pi-plus mr-1"></i> Iniciar Trámite
+        </button>
       </div>
 
       <!-- Pestañas de Vista -->
