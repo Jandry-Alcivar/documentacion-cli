@@ -38,6 +38,10 @@ import { AlertService } from '../services/alert.service.js';
             <i class="pi pi-folder-open"></i>
             <span>Trámites</span>
           </a>
+          <a routerLink="physical-archive" routerLinkActive="active-link" class="menu-item">
+            <i class="pi pi-box"></i>
+            <span>Archivo Físico</span>
+          </a>
           <a routerLink="documents" routerLinkActive="active-link" class="menu-item">
             <i class="pi pi-file"></i>
             <span>Documentos</span>
@@ -68,6 +72,10 @@ import { AlertService } from '../services/alert.service.js';
           <a routerLink="users" routerLinkActive="active-link" class="menu-item" *ngIf="showAdminMenu()">
             <i class="pi pi-users"></i>
             <span>Usuarios</span>
+          </a>
+          <a routerLink="workflow-designer" routerLinkActive="active-link" class="menu-item" *ngIf="showAdminMenu()">
+            <i class="pi pi-directions"></i>
+            <span>Diseñador de Flujos</span>
           </a>
           <a routerLink="catalogs" routerLinkActive="active-link" class="menu-item" *ngIf="showAdminMenu()">
             <i class="pi pi-cog"></i>

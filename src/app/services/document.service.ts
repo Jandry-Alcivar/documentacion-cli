@@ -72,4 +72,8 @@ export class DocumentService {
   verifyIntegrity(id: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/${id}/verify`, {});
   }
+
+  signAndApproveDocument(id: string, formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/sign-and-approve`, formData);
+  }
 }
