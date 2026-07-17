@@ -33,7 +33,7 @@ import { AuthService } from '../services/auth.service.js';
               <span class="logo-icon"><i class="pi pi-briefcase"></i></span>
               <h2>G-DOC</h2>
               <p>Sistema de Gestión Documental Inteligente</p>
-              <div class="sub-district">Distrito Chone</div>
+              <div class="sub-district">GAD Junín</div>
             </div>
           </ng-template>
           

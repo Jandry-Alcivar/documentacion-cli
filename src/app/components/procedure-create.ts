@@ -12,6 +12,9 @@ import { ProcedureService } from '../services/procedure.service.js';
 import { CatalogService } from '../services/catalog.service.js';
 import { DepartmentService } from '../services/department.service.js';
 import { DocumentService } from '../services/document.service.js';
+import { TemplateService } from '../services/template.service.js';
+import { RichEditorComponent } from './rich-editor.js';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-procedure-create',
@@ -23,7 +26,8 @@ import { DocumentService } from '../services/document.service.js';
     Card,
     InputText,
     Select,
-    Toast
+    Toast,
+    RichEditorComponent
   ],
   providers: [MessageService],
   template: `
@@ -125,7 +129,7 @@ import { DocumentService } from '../services/document.service.js';
                   name="subject" 
                   pInputText 
                   [(ngModel)]="subject" 
-                  placeholder="Ej. Solicitud de Mantenimiento de Alcantarillado Chone"
+                  placeholder="Ej. Solicitud de Mantenimiento de Alcantarillado Junín"
                   class="w-full"
                 />
               </div>
@@ -263,6 +267,21 @@ import { DocumentService } from '../services/document.service.js';
               
               <div class="section-title full-width">Documento Principal</div>
 
+              <div class="form-field full-width">
+                <label for="template-select">Seleccionar Plantilla de Redacción (Opcional)</label>
+                <p-select 
+                  [options]="templates" 
+                  [(ngModel)]="selectedTemplate" 
+                  name="template-select"
+                  optionLabel="name" 
+                  optionValue="id"
+                  placeholder="Elegir plantilla institucional para autocompletar..."
+                  styleClass="w-full form-dropdown"
+                  appendTo="body"
+                  (onChange)="onTemplateChange()"
+                ></p-select>
+              </div>
+
               <div class="form-field">
                 <label for="doc-type">Categoría del Documento Principal *</label>
                 <p-select 
@@ -292,14 +311,7 @@ import { DocumentService } from '../services/document.service.js';
 
               <div class="form-field full-width">
                 <label for="doc-content">Cuerpo del Documento (Contenido Principal) *</label>
-                <textarea 
-                  id="doc-content" 
-                  name="doc-content" 
-                  [(ngModel)]="docContent" 
-                  rows="6" 
-                  placeholder="Escriba aquí el cuerpo o contenido formal del documento..."
-                  class="w-full form-textarea font-mono"
-                ></textarea>
+                <app-rich-editor [(ngModel)]="docContent" [dynamicValues]="editorVars"></app-rich-editor>
               </div>
 
               <div class="section-title full-width">Archivos Anexos (Opcional)</div>
@@ -778,15 +790,19 @@ export class ProcedureCreateComponent implements OnInit {
   // Active Workflow Info
   activeWorkflow: any = null;
   workflows: any[] = [];
+  templates: any[] = [];
+  selectedTemplate: string | null = null;
 
   constructor(
     private procedureService: ProcedureService,
     private catalogService: CatalogService,
     private departmentService: DepartmentService,
     private documentService: DocumentService,
+    private templateService: TemplateService,
     private http: HttpClient,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -794,6 +810,7 @@ export class ProcedureCreateComponent implements OnInit {
     this.loadDepartments();
     this.loadDocumentTypes();
     this.loadWorkflows();
+    this.loadTemplates();
   }
 
   loadCatalogTypes() {
@@ -816,7 +833,13 @@ export class ProcedureCreateComponent implements OnInit {
 
   loadWorkflows() {
     this.http.get<any[]>('http://localhost:3001/api/workflows').subscribe({
-      next: (res) => this.workflows = res.filter(w => w.isActive)
+      next: (res) => { this.workflows = res.filter(w => w.isActive); this.cdr.detectChanges(); }
+    });
+  }
+
+  loadTemplates() {
+    this.templateService.getTemplates().subscribe({
+      next: (res) => { this.templates = res; this.cdr.detectChanges(); }
     });
   }
 
@@ -855,9 +878,35 @@ export class ProcedureCreateComponent implements OnInit {
     this.deptUsers = [];
     if (this.selectedDept) {
       this.departmentService.getDepartmentUsers(this.selectedDept).subscribe({
-        next: (res) => this.deptUsers = res
+        next: (res) => { this.deptUsers = res; this.cdr.detectChanges(); }
       });
     }
+  }
+
+  onTemplateChange() {
+    if (this.selectedTemplate) {
+      const template = this.templates.find(t => t.id === this.selectedTemplate);
+      if (template) {
+        this.docContent = template.content || '';
+        if (template.typeId) {
+          this.selectedDocType = template.typeId;
+        }
+        this.cdr.detectChanges();
+      }
+    }
+  }
+
+  get editorVars() {
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const d = new Date();
+    const fecha = `Junín, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+    return {
+      fecha: fecha,
+      destinatario: this.selectedDeptObj ? `Director/a Departamental de ${this.selectedDeptObj.name}` : undefined,
+      asunto: this.subject || '(Asunto no especificado)',
+      nombre_solicitante: this.applicantName || 'Ciudadano Solicitante',
+      codigo_tramite: 'TRM-NUEVO'
+    };
   }
 
   nextStep() {

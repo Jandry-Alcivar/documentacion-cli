@@ -136,7 +136,7 @@ import { ProcedureService } from '../services/procedure.service.js';
 
           <div class="form-field mb-2">
             <label>Código de Carpeta Física *</label>
-            <input type="text" pInputText [(ngModel)]="archiveForm.folderCode" placeholder="Ej. EXP-CHONE-2026-0045" class="w-full" />
+            <input type="text" pInputText [(ngModel)]="archiveForm.folderCode" placeholder="Ej. EXP-JUNIN-2026-0045" class="w-full" />
           </div>
           
           <div class="dialog-actions mt-4 flex justify-content-end gap-2">

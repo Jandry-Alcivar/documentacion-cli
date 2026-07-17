@@ -21,7 +21,7 @@ import { AlertService } from '../services/alert.service.js';
     <div class="dashboard-page animate-fade-in">
       <div class="welcome-header">
         <h1>Bienvenido de nuevo, {{ currentUser()?.name }} 👋</h1>
-        <p>Distrito Chone — Sistema de Gestión Documental Inteligente (G-DOC)</p>
+        <p>GAD Junín — Sistema de Gestión Documental Inteligente (G-DOC)</p>
       </div>
 
       <!-- VISTA ADMINISTRADOR -->

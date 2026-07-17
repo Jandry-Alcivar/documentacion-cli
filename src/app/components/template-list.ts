@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -11,6 +11,7 @@ import { MessageService } from 'primeng/api';
 import { AuthService } from '../services/auth.service.js';
 import { TemplateService } from '../services/template.service.js';
 import { CatalogService } from '../services/catalog.service.js';
+import { RichEditorComponent } from './rich-editor.js';
 
 @Component({
   selector: 'app-template-list',
@@ -23,7 +24,8 @@ import { CatalogService } from '../services/catalog.service.js';
     Dialog,
     InputText,
     Select,
-    Toast
+    Toast,
+    RichEditorComponent
   ],
   providers: [MessageService],
   template: `
@@ -100,7 +102,7 @@ import { CatalogService } from '../services/catalog.service.js';
         [header]="dialogHeader" 
         [(visible)]="showDialog" 
         [modal]="true" 
-        [style]="{width: '650px'}"
+        [style]="{width: '1150px'}"
       >
         <div class="template-form">
           <div class="form-field">
@@ -154,14 +156,7 @@ import { CatalogService } from '../services/catalog.service.js';
 
           <div class="form-field">
             <label for="content">Cuerpo de la Plantilla *</label>
-            <textarea 
-              id="content" 
-              [(ngModel)]="content" 
-              rows="12" 
-              required 
-              placeholder="Escribe el texto base. Puedes usar llaves para variables como {nombre_solicitante}, {fecha}, etc."
-              class="w-full form-textarea font-mono"
-            ></textarea>
+            <app-rich-editor [(ngModel)]="content"></app-rich-editor>
           </div>
         </div>
 
@@ -318,7 +313,8 @@ export class TemplateListComponent implements OnInit {
     private authService: AuthService,
     private templateService: TemplateService,
     private catalogService: CatalogService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -332,13 +328,13 @@ export class TemplateListComponent implements OnInit {
 
   loadTemplates() {
     this.templateService.getTemplates().subscribe({
-      next: (res) => this.templates = res
+      next: (res) => { this.templates = res; this.cdr.detectChanges(); }
     });
   }
 
   loadDocTypes() {
     this.catalogService.getDocumentTypes().subscribe({
-      next: (res) => this.docTypes = res
+      next: (res) => { this.docTypes = res; this.cdr.detectChanges(); }
     });
   }
 
@@ -351,11 +347,10 @@ export class TemplateListComponent implements OnInit {
     this.content = '';
     this.dialogHeader = 'Crear Plantilla Base';
     this.showDialog = true;
+    this.cdr.detectChanges();
   }
 
   openEdit(template: any) {
-    // Si no es admin y no es el creador, solo ver (solo lectura en UI o deshabilitar botón guardar)
-    // Para simplificar, abriremos el diálogo. Si es empleado, se puede leer/copiar el cuerpo del texto.
     this.editingId = template.id;
     this.name = template.name;
     this.selectedDocType = template.typeId;
@@ -364,6 +359,7 @@ export class TemplateListComponent implements OnInit {
     this.content = template.content;
     this.dialogHeader = this.isAdmin() ? 'Editar Plantilla Base' : 'Ver Formato Base (Solo Lectura)';
     this.showDialog = true;
+    this.cdr.detectChanges();
   }
 
   onSave() {

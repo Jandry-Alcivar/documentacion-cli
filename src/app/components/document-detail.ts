@@ -49,7 +49,7 @@ import { DepartmentService } from '../services/department.service.js';
       </div>
 
       <!-- ALERTA DE INTEGRIDAD CRIPTOGRÁFICA -->
-      <div class="integrity-card" [ngClass]="document.integrity?.isValid ? 'integrity-ok' : 'integrity-fail'">
+      <div *ngIf="document.fileUrl" class="integrity-card" [ngClass]="document.integrity?.isValid ? 'integrity-ok' : 'integrity-fail'">
         <div class="integrity-icon">
           <i class="pi" [ngClass]="document.integrity?.isValid ? 'pi-verified' : 'pi-exclamation-triangle'"></i>
         </div>
@@ -143,10 +143,52 @@ import { DepartmentService } from '../services/department.service.js';
       <div *ngIf="activeTab === 'viewer'" class="tab-pane-content">
         <p-card styleClass="info-card" header="Previsualización del Documento">
           
-          <!-- WYSIWYG Content -->
-          <div class="internal-content-preview mb-3" *ngIf="document.content">
-            <h4>Documento Redactado</h4>
-            <div class="wysiwyg-box">{{ document.content }}</div>
+          <!-- WYSIWYG Content (Simulado A4 con membrete oficial del GAD Junín) -->
+          <div class="internal-content-preview mb-3" *ngIf="document.content && !document.fileUrl">
+            <h4 class="mb-3 text-muted">Previsualización de Impresión Oficial (Borrador)</h4>
+            
+            <div class="paper-container">
+              <div id="pdf-visor-preview-area" class="a4-sheet pdf-preview-sheet" (click)="onSheetClick($event)">
+                <!-- MEMBRETE OFJUNÍN -->
+                <div class="pdf-header">
+                  <div class="header-top">
+                    <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M50 5C25 5 20 20 20 50C20 80 50 95 50 95C50 95 80 80 80 50C80 20 75 5 50 5Z" fill="#1e3a8a" stroke="#fbbf24" stroke-width="4"/>
+                      <path d="M50 15L60 35H40L50 15Z" fill="#fbbf24"/>
+                      <circle cx="50" cy="55" r="15" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
+                      <path d="M50 40V70M35 55H65" stroke="#ffffff" stroke-width="3"/>
+                    </svg>
+                    <div class="header-text">
+                      <h2>GOBIERNO AUTÓNOMO DESCENTRALIZADO</h2>
+                      <h1>MUNICIPAL DEL CANTÓN JUNÍN</h1>
+                      <p>GAD Junín — Sistema de Gestión Documental Inteligente (G-DOC)</p>
+                    </div>
+                  </div>
+                  <div class="header-divider"></div>
+                </div>
+
+                <!-- CUERPO DE DOCUMENTO PROCESADO -->
+                <div class="pdf-body" [innerHTML]="processedContent"></div>
+
+                <!-- PIE DE PÁGINA OFICIAL JUNÍN -->
+                <div class="pdf-footer">
+                  <div class="footer-divider"></div>
+                  <div class="footer-bottom">
+                    <div class="footer-info">
+                      <p>Dirección: Calle Bolívar y Pichincha, Junín, Manabí, Ecuador</p>
+                      <p>Teléfono: (05) 2695-123 | Correo: correspondencia&#64;junin.gob.ec</p>
+                      <p class="bold-text">Administración Cantonal Junín 2023-2027</p>
+                    </div>
+                    <div class="footer-qr">
+                      <div class="qr-mock">
+                        <div class="qr-box"></div>
+                        <span>Criptografía SHA256</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Physical File iframe PDF viewer -->
@@ -212,17 +254,35 @@ import { DepartmentService } from '../services/department.service.js';
 
             <!-- 2. LIDER O ALCALDE: Aprobación y Firma o Devolución -->
             <div *ngIf="canApproveOrReject()" class="workflow-action-box">
-              <p>Como autoridad evaluadora, debes validar y firmar digitalmente este documento, o devolverlo al creador.</p>
+              <p>Como autoridad evaluadora, debes validar y firmar digitalmente este documento con tu certificado de firma electrónica (.p12), o devolverlo al creador.</p>
+              <p class="text-sm mb-3" style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4; background: rgba(59, 130, 246, 0.1); padding: 0.6rem; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                <i class="pi pi-info-circle" style="color: #60a5fa; margin-right: 4px;"></i>
+                <strong>Firma Visual:</strong> Para estampar tu firma en un sitio específico de la hoja, ve primero a la pestaña <strong>Visor</strong> y haz clic sobre el lugar exacto. Verás el sello verde de verificación. Luego regresa aquí para completar la firma.
+              </p>
+              
               <div class="firmar-upload-section mb-3">
-                <label class="block mb-2 font-semibold">Cargar Archivo Firmado Digitalmente (PDF) *</label>
-                <input type="file" (change)="onSignatureFileSelect($event)" accept=".pdf" class="mb-2" />
+                <label class="block mb-2 font-semibold">Cargar Firma Electrónica (.p12) *</label>
+                <input type="file" (change)="onCertificateFileSelect($event)" accept=".p12" class="mb-3 block" />
+                
+                <label class="block mb-2 font-semibold">Contraseña del Certificado *</label>
+                <div class="input-icon-wrapper w-full mb-3" style="position: relative;">
+                  <i class="pi pi-lock" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
+                  <input 
+                    type="password" 
+                    [(ngModel)]="certPassword" 
+                    placeholder="Contraseña de tu firma .p12" 
+                    class="w-full text-box" 
+                    style="padding-left: 2.5rem;"
+                  />
+                </div>
               </div>
+              
               <div class="flex-row">
                 <p-button 
                   label="Firmar y Aprobar" 
                   icon="pi pi-verified" 
                   styleClass="p-button-success flex-grow"
-                  [disabled]="!signatureFile"
+                  [disabled]="!certificateFile || !certPassword"
                   (click)="onSignAndApprove()"
                   [loading]="loading"
                 ></p-button>
@@ -320,6 +380,165 @@ import { DepartmentService } from '../services/department.service.js';
           </div>
         </div>
       </p-dialog>
+
+      <!-- DIÁLOGO PARA UBICAR LA FIRMA VISUAL Y CONFIRMAR -->
+      <p-dialog 
+        header="Ubicar Firma Electrónica en el Documento" 
+        [(visible)]="showSignaturePlacementDialog" 
+        [modal]="true" 
+        [style]="{width: '850px'}" 
+        [contentStyle]="{maxHeight: '650px', overflowY: 'auto'}"
+        (onHide)="onPlacementDialogHide()"
+      >
+        <div class="dialog-placement-content" style="text-align: center;">
+          <p class="mb-3 text-muted" style="font-size: 0.9rem; text-align: left; background: rgba(59, 130, 246, 0.1); padding: 0.6rem; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.2);">
+            <i class="pi pi-info-circle" style="color: #60a5fa; margin-right: 4px;"></i>
+            <strong>Instrucción:</strong> Haz clic sobre la hoja del documento en el lugar exacto donde deseas colocar tu firma. Una vez que aparezca el sello verde en la posición deseada, haz clic en <strong>Confirmar Firma y Enviar</strong>.
+          </p>
+
+          <div class="paper-container" style="background: #1e293b; padding: 1.5rem; border-radius: 8px; max-height: 500px; display: inline-flex; justify-content: center; width: 100%;">
+            <div id="pdf-modal-content-area" class="a4-sheet pdf-preview-sheet" (click)="onModalSheetClick($event)" style="position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5); cursor: crosshair;">
+              <!-- MEMBRETE OFICIAL JUNÍN -->
+              <div class="pdf-header">
+                <div class="header-top">
+                  <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 5C25 5 20 20 20 50C20 80 50 95 50 95C50 95 80 80 80 50C80 20 75 5 50 5Z" fill="#1e3a8a" stroke="#fbbf24" stroke-width="4"/>
+                    <path d="M50 15L60 35H40L50 15Z" fill="#fbbf24"/>
+                    <circle cx="50" cy="55" r="15" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
+                    <path d="M50 40V70M35 55H65" stroke="#ffffff" stroke-width="3"/>
+                  </svg>
+                  <div class="header-text">
+                    <h2>GOBIERNO AUTÓNOMO DESCENTRALIZADO</h2>
+                    <h1>MUNICIPAL DEL CANTÓN JUNÍN</h1>
+                    <p>GAD Junín — Sistema de Gestión Documental Inteligente (G-DOC)</p>
+                  </div>
+                </div>
+                <div class="header-divider"></div>
+              </div>
+
+              <!-- CUERPO DE DOCUMENTO PROCESADO -->
+              <div class="pdf-body" [innerHTML]="processedContent"></div>
+
+              <!-- FIRMA ELECTRÓNICA VISUAL DENTRO DE LA HOJA (DENTRO DEL MODAL) -->
+              <div 
+                *ngIf="signaturePos" 
+                class="visual-signature-stamp-overlay" 
+                [style.left.%]="signaturePos.x" 
+                [style.top.%]="signaturePos.y"
+                style="transform: translate(-50%, -50%);"
+              >
+                <div class="stamp-box">
+                  <div class="stamp-qr" style="display: flex; align-items: center;">
+                    <img *ngIf="signatureDate" [src]="getQrCodeUrl()" alt="QR" style="width: 55px; height: 55px; border: 1px solid #a7f3d0; border-radius: 4px;" />
+                  </div>
+                  <div class="stamp-details">
+                    <span class="stamp-title">FIRMADO ELECTRÓNICAMENTE</span>
+                    <strong class="stamp-name">{{ getCurrentUser()?.name }}</strong>
+                    <span class="stamp-meta">Cargo: {{ getCurrentUser()?.role?.name || 'Autoridad' }}</span>
+                    <span class="stamp-meta">Fecha: {{ signatureDate | date:'yyyy-MM-dd HH:mm' }}</span>
+                    <span class="stamp-meta">Entidad: GAD Municipal Junín</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PIE DE PÁGINA OFICIAL JUNÍN -->
+              <div class="pdf-footer">
+                <div class="footer-divider"></div>
+                <div class="footer-bottom">
+                  <div class="footer-info">
+                    <p>Dirección: Calle Bolívar y Pichincha, Junín, Manabí, Ecuador</p>
+                    <p>Teléfono: (05) 2695-123 | Correo: correspondencia&#64;junin.gob.ec</p>
+                    <p class="bold-text">Administración Cantonal Junín 2023-2027</p>
+                  </div>
+                  <div class="footer-qr">
+                    <div class="qr-mock">
+                      <div class="qr-box"></div>
+                      <span>Criptografía SHA256</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-actions mt-4 flex justify-content-end gap-2">
+          <p-button label="Cancelar" icon="pi pi-times" styleClass="p-button-text p-button-secondary" (click)="showSignaturePlacementDialog = false"></p-button>
+          <p-button 
+            label="Confirmar Firma y Enviar" 
+            icon="pi pi-check" 
+            styleClass="p-button-success" 
+            [disabled]="!signaturePos || loading" 
+            (click)="executeSigning()"
+          ></p-button>
+        </div>
+      </p-dialog>
+
+      <!-- CONTENEDOR OCULTO PARA GENERACIÓN DE PDF (Con layout activo para html2pdf) -->
+      <div style="position: absolute; left: -9999px; top: -9999px; overflow: hidden; width: 210mm; min-height: 297mm; background: #ffffff;">
+        <div id="pdf-content-area" class="a4-sheet pdf-preview-sheet" style="box-shadow: none !important; border-radius: 0 !important; width: 210mm; min-height: 297mm; padding: 25mm; box-sizing: border-box; background: #ffffff; color: #1e293b;">
+          <!-- MEMBRETE OFICIAL JUNÍN -->
+          <div class="pdf-header">
+            <div class="header-top">
+              <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5C25 5 20 20 20 50C20 80 50 95 50 95C50 95 80 80 80 50C80 20 75 5 50 5Z" fill="#1e3a8a" stroke="#fbbf24" stroke-width="4"/>
+                <path d="M50 15L60 35H40L50 15Z" fill="#fbbf24"/>
+                <circle cx="50" cy="55" r="15" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
+                <path d="M50 40V70M35 55H65" stroke="#ffffff" stroke-width="3"/>
+              </svg>
+              <div class="header-text">
+                <h2>GOBIERNO AUTÓNOMO DESCENTRALIZADO</h2>
+                <h1>MUNICIPAL DEL CANTÓN JUNÍN</h1>
+                <p>GAD Junín — Sistema de Gestión Documental Inteligente (G-DOC)</p>
+              </div>
+            </div>
+            <div class="header-divider"></div>
+          </div>
+
+          <!-- CUERPO DE DOCUMENTO PROCESADO -->
+          <div class="pdf-body" [innerHTML]="processedContent"></div>
+
+          <!-- FIRMA ELECTRÓNICA VISUAL DENTRO DE LA HOJA -->
+          <div 
+            *ngIf="signaturePos" 
+            class="visual-signature-stamp-overlay" 
+            [style.left.%]="signaturePos.x" 
+            [style.top.%]="signaturePos.y"
+            style="transform: translate(-50%, -50%);"
+          >
+            <div class="stamp-box">
+              <div class="stamp-qr" style="display: flex; align-items: center;">
+                <img *ngIf="signatureDate" [src]="getQrCodeUrl()" alt="QR" style="width: 55px; height: 55px; border: 1px solid #a7f3d0; border-radius: 4px;" />
+              </div>
+              <div class="stamp-details">
+                <span class="stamp-title">FIRMADO ELECTRÓNICAMENTE</span>
+                <strong class="stamp-name">{{ getCurrentUser()?.name }}</strong>
+                <span class="stamp-meta">Cargo: {{ getCurrentUser()?.role?.name || 'Autoridad' }}</span>
+                <span class="stamp-meta">Fecha: {{ signatureDate | date:'yyyy-MM-dd HH:mm' }}</span>
+                <span class="stamp-meta">Entidad: GAD Municipal Junín</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PIE DE PÁGINA OFICIAL JUNÍN -->
+          <div class="pdf-footer">
+            <div class="footer-divider"></div>
+            <div class="footer-bottom">
+              <div class="footer-info">
+                <p>Dirección: Calle Bolívar y Pichincha, Junín, Manabí, Ecuador</p>
+                <p>Teléfono: (05) 2695-123 | Correo: correspondencia&#64;junin.gob.ec</p>
+                <p class="bold-text">Administración Cantonal Junín 2023-2027</p>
+              </div>
+              <div class="footer-qr">
+                <div class="qr-mock">
+                  <div class="qr-box"></div>
+                  <span>Criptografía SHA256</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -611,6 +830,200 @@ import { DepartmentService } from '../services/department.service.js';
     }
     .text-red { color: #f87171; }
     .font-semibold { font-weight: 600; }
+
+    /* Estilos Hoja A4 y Membrete GAD Junín */
+    .paper-container {
+      display: flex;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 2rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      max-height: 800px;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-top: 1rem;
+    }
+    .a4-sheet {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 25mm;
+      background: #ffffff;
+      color: #1e293b;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      border-radius: 4px;
+      font-family: 'Arial', sans-serif;
+      font-size: 11pt;
+      outline: none;
+      box-sizing: border-box;
+      text-align: justify;
+    }
+    .pdf-preview-sheet {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #1e293b !important;
+      position: relative;
+    }
+    .pdf-header {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 2rem;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+    .header-text h2 {
+      font-size: 8.5pt;
+      margin: 0;
+      color: #475569;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .header-text h1 {
+      font-size: 13.5pt;
+      margin: 0;
+      color: #1e3a8a;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .header-text p {
+      font-size: 7.5pt;
+      margin: 2px 0 0;
+      color: #64748b;
+    }
+    .header-divider {
+      height: 3px;
+      background: linear-gradient(90deg, #1e3a8a 0%, #fbbf24 50%, #22c55e 100%);
+      margin-top: 0.75rem;
+      border-radius: 2px;
+    }
+    .pdf-body {
+      flex: 1;
+      padding: 0.5rem 0;
+      font-size: 11pt;
+      color: #0f172a;
+      line-height: 1.5;
+    }
+    .pdf-body ::ng-deep table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #cbd5e1;
+      margin: 1rem 0;
+    }
+    .pdf-body ::ng-deep td {
+      border: 1px solid #cbd5e1;
+      padding: 8px;
+      min-height: 24px;
+    }
+    .pdf-footer {
+      display: flex;
+      flex-direction: column;
+      margin-top: 2rem;
+    }
+    .footer-divider {
+      height: 1px;
+      background: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-info {
+      font-size: 7.5pt;
+      color: #64748b;
+      line-height: 1.3;
+      text-align: left;
+    }
+    .footer-info p {
+      margin: 0;
+    }
+    .bold-text {
+      font-weight: 700;
+      color: #475569;
+    }
+    .footer-qr {
+      display: flex;
+      align-items: center;
+    }
+    .qr-mock {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .qr-box {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #94a3b8;
+      background-image: 
+        radial-gradient(#1e293b 25%, transparent 25%),
+        radial-gradient(#1e293b 25%, transparent 25%);
+      background-size: 8px 8px;
+      background-position: 0 0, 4px 4px;
+    }
+    .qr-mock span {
+      font-size: 6pt;
+      color: #94a3b8;
+    }
+
+    /* Estilo del Sello de Firma Visual */
+    .visual-signature-stamp-overlay {
+      position: absolute;
+      width: 260px;
+      height: 90px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px dashed #059669;
+      border-radius: 6px;
+      padding: 6px;
+      color: #047857;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 7.5pt;
+      line-height: 1.2;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      cursor: pointer;
+      text-align: left;
+    }
+    .stamp-box {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .stamp-logo {
+      color: #059669;
+      font-size: 1.6rem;
+    }
+    .stamp-details {
+      display: flex;
+      flex-direction: column;
+    }
+    .stamp-title {
+      font-weight: 800;
+      font-size: 6.5pt;
+      color: #065f46;
+      border-bottom: 1px solid #a7f3d0;
+      margin-bottom: 2px;
+      padding-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+    .stamp-name {
+      font-size: 7.5pt;
+      color: #064e3b;
+    }
+    .stamp-meta {
+      font-size: 6.5pt;
+      color: #374151;
+    }
   `]
 })
 export class DocumentDetailComponent implements OnInit {
@@ -630,6 +1043,11 @@ export class DocumentDetailComponent implements OnInit {
   // Signature and corrections
   signatureFile: File | null = null;
   correctionFile: File | null = null;
+  certificateFile: File | null = null;
+  certPassword = '';
+  signaturePos: { x: number, y: number } | null = null;
+  signatureDate: Date | null = null;
+  showSignaturePlacementDialog = false;
   loading = false;
 
   constructor(
@@ -653,6 +1071,33 @@ export class DocumentDetailComponent implements OnInit {
   changeTab(tab: string) {
     this.activeTab = tab;
     this.cdr.detectChanges();
+  }
+
+  get processedContent(): string {
+    if (!this.document || !this.document.content) return '';
+    let result = this.document.content;
+
+    const d = new Date(this.document.createdAt || new Date());
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const fechaFormatted = `Junín, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+
+    const vals = {
+      fecha: fechaFormatted,
+      destinatario: 'Director(a) de Departamento Municipal',
+      encabezado: 'SOLICITUD FORMAL',
+      asunto: this.document.title || '(Asunto del Trámite No Registrado)',
+      nombre_solicitante: this.document.creator?.name || 'Ciudadano del Cantón Junín',
+      codigo_tramite: this.document.procedureId ? `TRM-${this.document.procedureId.substring(0,8).toUpperCase()}` : 'TRM-DETALLE'
+    };
+
+    result = result.replace(/\{\{fecha\}\}/g, vals.fecha);
+    result = result.replace(/\{\{destinatario\}\}/g, vals.destinatario);
+    result = result.replace(/\{\{encabezado\}\}/g, vals.encabezado);
+    result = result.replace(/\{\{asunto\}\}/g, vals.asunto);
+    result = result.replace(/\{\{nombre_solicitante\}\}/g, vals.nombre_solicitante);
+    result = result.replace(/\{\{codigo_tramite\}\}/g, vals.codigo_tramite);
+
+    return result;
   }
 
   loadDocumentDetails(id: string) {
@@ -691,12 +1136,15 @@ export class DocumentDetailComponent implements OnInit {
   }
 
   getPdfUrl() {
-    // Retorna la URL del PDF servido por el backend
-    return `http://localhost:3001/${this.document.fileUrl}`;
+    if (!this.document || !this.document.fileUrl) return '';
+    const cleanUrl = this.document.fileUrl.startsWith('/') 
+      ? this.document.fileUrl.replace(/^\/+/, '') 
+      : this.document.fileUrl;
+    return `http://localhost:3001/${cleanUrl}`;
   }
 
   getSafePdfUrl(): SafeResourceUrl {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`http://localhost:3001/${this.document.fileUrl}`);
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.getPdfUrl());
   }
 
   openFileUrl() {
@@ -747,10 +1195,139 @@ export class DocumentDetailComponent implements OnInit {
     return this.document.status === 'REJECTED' && this.document.creatorId === user.id;
   }
 
-  onSignatureFileSelect(event: any) {
+  onCertificateFileSelect(event: any) {
     if (event.target.files && event.target.files.length > 0) {
-      this.signatureFile = event.target.files[0];
+      this.certificateFile = event.target.files[0];
     }
+  }
+
+  getCurrentUser() {
+    return this.authService.currentUser();
+  }
+
+  onSheetClick(event: MouseEvent) {
+    if (!this.canApproveOrReject()) return;
+    this.onSignAndApprove();
+  }
+
+  onModalSheetClick(event: MouseEvent) {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // Calcular coordenadas porcentuales relativas al tamaño del contenedor para precisión perfecta
+    this.signaturePos = { 
+      x: (x / rect.width) * 100, 
+      y: (y / rect.height) * 100 
+    };
+    this.signatureDate = new Date();
+    this.cdr.detectChanges();
+  }
+
+  onPlacementDialogHide() {
+    this.showSignaturePlacementDialog = false;
+  }
+
+  getQrCodeUrl(): string {
+    if (!this.document) return '';
+    const user = this.getCurrentUser();
+    const dateStr = this.signatureDate ? this.signatureDate.toISOString() : new Date().toISOString();
+    const qrData = `FIRMADO ELECTRONICAMENTE\nFirmante: ${user?.name || ''}\nFecha: ${dateStr}\nValidador: G-DOC GAD JUNIN\nDocID: ${this.document.id}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+  }
+
+  onSignAndApprove() {
+    if (!this.certificateFile || !this.certPassword) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Datos Faltantes',
+        detail: 'Carga tu archivo de firma .p12 e ingresa la contraseña antes de proceder.'
+      });
+      return;
+    }
+    
+    // Cargar la librería si aún no se ha cargado
+    this.loadHtml2PdfScript();
+
+    // Limpiar firmas previas y abrir el diálogo
+    this.signaturePos = null;
+    this.signatureDate = null;
+    this.showSignaturePlacementDialog = true;
+    this.cdr.detectChanges();
+  }
+
+  executeSigning() {
+    if (!this.certificateFile || !this.certPassword || !this.signaturePos) return;
+    this.loading = true;
+
+    const element = document.getElementById('pdf-content-area');
+    if (!element) {
+      this.loading = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo encontrar el área de impresión del documento.'
+      });
+      return;
+    }
+
+    const opt = {
+      margin:       0,
+      filename:     `DOCUMENTO_${this.document.id.substring(0,8).toUpperCase()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    if (!(window as any).html2pdf) {
+      setTimeout(() => this.executeSigning(), 1000);
+      return;
+    }
+
+    // Generar el PDF en memoria y subirlo junto con el certificado .p12 y contraseña
+    (window as any).html2pdf().from(element).set(opt).toPdf().outputPdf('arraybuffer').then((arrayBuffer: ArrayBuffer) => {
+      const pdfBlob = new Blob([arrayBuffer], { type: 'application/pdf' });
+      
+      const formData = new FormData();
+      formData.append('file', pdfBlob, `DOCUMENTO_${this.document.id.substring(0,8).toUpperCase()}.pdf`);
+      formData.append('certificate', this.certificateFile!);
+      formData.append('password', this.certPassword);
+
+      this.documentService.signAndApproveDocument(this.document.id, formData).subscribe({
+        next: () => {
+          this.loading = false;
+          this.showSignaturePlacementDialog = false;
+          this.certificateFile = null;
+          this.certPassword = '';
+          this.signaturePos = null;
+          this.signatureDate = null;
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Firmado y Aprobado',
+            detail: 'El documento ha sido firmado digitalmente (.p12) y aprobado.'
+          });
+          this.loadDocumentDetails(this.document.id);
+          this.activeTab = 'viewer'; // Redirigir al visor para ver el PDF firmado
+        },
+        error: (err) => {
+          this.loading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.error?.error || 'No se pudo firmar el documento.'
+          });
+        }
+      });
+    }).catch((err: any) => {
+      this.loading = false;
+      console.error('Error al generar PDF:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error al compilar el PDF para firma.'
+      });
+    });
   }
 
   onFileSelect(event: any) {
@@ -759,7 +1336,14 @@ export class DocumentDetailComponent implements OnInit {
     }
   }
 
-  // Workflow Handlers
+  loadHtml2PdfScript() {
+    if ((window as any).html2pdf) return;
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }
+
   onSubmitForApproval() {
     this.loading = true;
     this.documentService.submitDocument(this.document.id).subscribe({
@@ -773,35 +1357,6 @@ export class DocumentDetailComponent implements OnInit {
         this.loadDocumentDetails(this.document.id);
       },
       error: () => this.loading = false
-    });
-  }
-
-  onSignAndApprove() {
-    if (!this.signatureFile) return;
-    this.loading = true;
-
-    const formData = new FormData();
-    formData.append('file', this.signatureFile);
-
-    this.documentService.signAndApproveDocument(this.document.id, formData).subscribe({
-      next: () => {
-        this.loading = false;
-        this.signatureFile = null;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Aprobado',
-          detail: 'Documento firmado digitalmente y aprobado.'
-        });
-        this.loadDocumentDetails(this.document.id);
-      },
-      error: (err) => {
-        this.loading = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: err.error?.error || 'No se pudo firmar el documento.'
-        });
-      }
     });
   }
 

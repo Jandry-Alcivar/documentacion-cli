@@ -278,7 +278,7 @@ import { CatalogService } from '../services/catalog.service.js';
               <div class="mock-sheet" [style.padding-top.px]="formatConfig.top" [style.padding-bottom.px]="formatConfig.bottom" [style.padding-left.px]="formatConfig.left" [style.padding-right.px]="formatConfig.right">
                 <div class="mock-header" [style.height.px]="formatConfig.header">
                   <div class="mock-logo">G-DOC LOGO</div>
-                  <div class="mock-subtitle">DISTRITO CHONE</div>
+                  <div class="mock-subtitle">GAD MUNICIPAL JUNÍN</div>
                 </div>
                 <div class="mock-body">
                   <h5>ASUNTO DEL DOCUMENTO</h5>
@@ -286,7 +286,7 @@ import { CatalogService } from '../services/catalog.service.js';
                 </div>
                 <div class="mock-footer" [style.height.px]="formatConfig.footer">
                   <span>Página 1 de 1</span>
-                  <span>Distrito Chone 2026 - Todos los derechos reservados.</span>
+                  <span>GAD Municipal Junín 2026 - Todos los derechos reservados.</span>
                 </div>
               </div>
             </div>
@@ -454,7 +454,7 @@ import { CatalogService } from '../services/catalog.service.js';
       <p-dialog [(visible)]="showWhDialog" header="Guardar Bodega" [modal]="true" [style]="{width: '400px'}">
         <div class="form-vertical">
           <label>Nombre de la Bodega *</label>
-          <input type="text" pInputText [(ngModel)]="whName" placeholder="Ej. Bodega General Chone" class="w-full mb-3" />
+          <input type="text" pInputText [(ngModel)]="whName" placeholder="Ej. Bodega General Junín" class="w-full mb-3" />
           <label>Ubicación *</label>
           <input type="text" pInputText [(ngModel)]="whLocation" placeholder="Ej. Planta Baja, Sector Sur" class="w-full mb-3" />
           <label>Tipo de Bodega *</label>
