@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Card } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -255,7 +255,7 @@ export class ReportListComponent implements OnInit {
   deptChartData: any;
   deptChartOptions: any;
 
-  constructor(private reportService: ReportService) {}
+  constructor(private reportService: ReportService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.loadProceduresReport();
@@ -267,6 +267,7 @@ export class ReportListComponent implements OnInit {
       next: (res) => {
         this.procData = res;
         this.buildCharts();
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading procedures report', err)
     });
@@ -274,7 +275,10 @@ export class ReportListComponent implements OnInit {
 
   loadDocumentsReport() {
     this.reportService.getDocumentsReport().subscribe({
-      next: (res) => this.docData = res,
+      next: (res) => {
+        this.docData = res;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error loading documents report', err)
     });
   }

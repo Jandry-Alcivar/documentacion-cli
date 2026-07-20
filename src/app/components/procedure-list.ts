@@ -155,7 +155,7 @@ import { DepartmentService } from '../services/department.service.js';
               <ng-template pTemplate="body" let-doc>
                 <tr>
                   <td class="text-white">{{ doc.title }}</td>
-                  <td>{{ doc.status }}</td>
+                  <td>{{ getFriendlyStatus(doc) }}</td>
                   <td class="text-center">
                     <p-button 
                       icon="pi pi-eye" 
@@ -486,6 +486,27 @@ export class ProcedureListComponent implements OnInit {
     if (p.includes('ALTA') || p.includes('URGENTE')) return 'p-alta';
     if (p.includes('BAJA')) return 'p-baja';
     return 'p-normal';
+  }
+
+  getFriendlyStatus(doc: any): string {
+    if (!doc) return '';
+    const status = doc.status;
+    if (status === 'PENDING_LEADER') {
+      const deptName = this.selectedProcedure?.department?.name || doc.department?.name || 'Jefatura';
+      return `Pendiente Firma: ${deptName}`;
+    }
+    if (status === 'PENDING_MAYOR') {
+      return 'Pendiente Firma: Alcalde';
+    }
+    if (status === 'DRAFT') return 'Borrador';
+    if (status === 'APPROVED') return 'Aprobado';
+    if (status === 'REJECTED') return 'Devuelto para Corrección';
+    if (status === 'SENT_TO_DEPT') {
+      return `Derivado a Depto`;
+    }
+    if (status === 'ASSIGNED_TO_EMPLOYEE') return 'Asignado a Funcionario';
+    if (status === 'RESPONDED') return 'Respondido';
+    return status;
   }
 
   getStatusClass(status: string): string {

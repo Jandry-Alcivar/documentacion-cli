@@ -125,7 +125,7 @@ import { CatalogService } from '../services/catalog.service.js';
               <td>{{ doc.createdAt | date:'shortDate' }}</td>
               <td>
                 <span class="status-badge" [ngClass]="getStatusClass(doc.status)">
-                  {{ doc.status }}
+                  {{ getFriendlyStatus(doc) }}
                 </span>
               </td>
               <td>
@@ -484,6 +484,26 @@ export class DocumentListComponent implements OnInit {
         });
       }
     });
+  }
+
+  getFriendlyStatus(doc: any): string {
+    const status = doc.status;
+    if (status === 'PENDING_LEADER') {
+      const deptName = doc.procedure?.department?.name || doc.department?.name || 'Jefatura';
+      return `Pendiente Firma: ${deptName}`;
+    }
+    if (status === 'PENDING_MAYOR') {
+      return 'Pendiente Firma: Alcalde';
+    }
+    if (status === 'DRAFT') return 'Borrador';
+    if (status === 'APPROVED') return 'Aprobado';
+    if (status === 'REJECTED') return 'Devuelto para Corrección';
+    if (status === 'SENT_TO_DEPT') {
+      return `Derivado a Depto`;
+    }
+    if (status === 'ASSIGNED_TO_EMPLOYEE') return 'Asignado a Funcionario';
+    if (status === 'RESPONDED') return 'Respondido';
+    return status;
   }
 
   getStatusClass(status: string): string {

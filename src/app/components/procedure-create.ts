@@ -166,7 +166,7 @@ import { ChangeDetectorRef } from '@angular/core';
               </div>
 
               <div class="form-field">
-                <label for="assignee">Asignar Operador Específico (Opcional)</label>
+                <label for="assignee">Asignar Funcionario Operador Responsable *</label>
                 <p-select 
                   [options]="deptUsers" 
                   [(ngModel)]="selectedUser" 
@@ -179,7 +179,7 @@ import { ChangeDetectorRef } from '@angular/core';
                   appendTo="body"
                 ></p-select>
                 <small class="help-text" *ngIf="activeWorkflow && activeWorkflow.nodes && activeWorkflow.nodes.length > 0">
-                  <i class="pi pi-info-circle"></i> Opcional: Puede fijar un operador específico para iniciar la ruta.
+                  <i class="pi pi-info-circle"></i> * Obligatorio: Seleccione el funcionario responsable que revisará e iniciará el trámite.
                 </small>
               </div>
 
@@ -254,7 +254,7 @@ import { ChangeDetectorRef } from '@angular/core';
               <button class="p-button p-button-secondary p-button-text mr-2" (click)="prevStep()">
                 <i class="pi pi-arrow-left mr-1"></i> Anterior
               </button>
-              <button class="p-button p-button-primary" [disabled]="!subject || !selectedDept || !applicantName" (click)="nextStep()">
+              <button class="p-button p-button-primary" [disabled]="!subject || !selectedDept || !selectedUser || !applicantName" (click)="nextStep()">
                 Siguiente <i class="pi pi-arrow-right ml-1"></i>
               </button>
             </div>
@@ -911,7 +911,7 @@ export class ProcedureCreateComponent implements OnInit {
 
   nextStep() {
     if (this.currentStep === 1 && !this.selectedType) return;
-    if (this.currentStep === 2 && (!this.subject || !this.selectedDept || !this.applicantName)) return;
+    if (this.currentStep === 2 && (!this.subject || !this.selectedDept || !this.selectedUser || !this.applicantName)) return;
     if (this.currentStep === 3 && (!this.selectedDocType || !this.docTitle || !this.docContent)) return;
 
     this.currentStep++;

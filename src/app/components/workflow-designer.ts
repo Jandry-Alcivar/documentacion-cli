@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -6,7 +6,7 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Toast } from 'primeng/toast';
 import { Dialog } from 'primeng/dialog';
-import { MessageService, TreeNode } from 'primeng/api';
+import { MessageService, TreeNode, SharedModule, PrimeTemplate } from 'primeng/api';
 import { OrganizationChart } from 'primeng/organizationchart';
 import { DepartmentService } from '../services/department.service.js';
 import { CatalogService } from '../services/catalog.service.js';
@@ -21,7 +21,9 @@ import { CatalogService } from '../services/catalog.service.js';
     Select,
     Toast,
     Dialog,
-    OrganizationChart
+    OrganizationChart,
+    SharedModule,
+    PrimeTemplate
   ],
   providers: [MessageService],
   template: `
@@ -59,11 +61,18 @@ import { CatalogService } from '../services/catalog.service.js';
         <div class="canvas-header">
           <div class="canvas-title-group">
             <h3>Diseño de Ruta: {{ selectedFlow.name }}</h3>
-            <span class="save-status-badge"><i class="pi pi-cloud-upload"></i> Guardado Automático Activo</span>
+            <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 2px; display: flex; align-items: center; gap: 0.25rem;">
+              <i class="pi pi-briefcase" style="color: #6366f1;"></i> 
+              Trámite Relacionado: <strong style="color: #cbd5e1;">{{ selectedFlow.procedureType?.name || 'No especificado' }}</strong>
+            </div>
+            <span class="save-status-badge mt-1"><i class="pi pi-cloud-upload"></i> Guardado Automático Activo</span>
           </div>
           <div class="canvas-actions">
             <button class="p-button p-button-sm p-button-info mr-2" (click)="openAddNodeDialog()">
               <i class="pi pi-plus-circle mr-1"></i> Agregar Nodo al Flujo
+            </button>
+            <button class="p-button p-button-sm p-button-warning mr-2" (click)="openEditFlowDialog()">
+              <i class="pi pi-pencil mr-1"></i> Editar Flujo
             </button>
             <button class="p-button p-button-sm p-button-danger p-button-outlined mr-2" *ngIf="selectedFlow.isActive" (click)="toggleFlowStatus(false)">
               <i class="pi pi-ban mr-1"></i> Desactivar Flujo
@@ -76,24 +85,50 @@ import { CatalogService } from '../services/catalog.service.js';
 
         <div class="chart-container">
           <p-organizationchart [value]="chartData" styleClass="custom-org-chart">
-            <ng-template let-node pTemplate="default">
-              <div class="node-box" [class.node-start]="node.data.isStart" [class.node-end]="node.data.isEnd">
-                <div class="node-badge" *ngIf="node.data.isStart"><i class="pi pi-play-circle"></i> INICIO</div>
-                <div class="node-badge" *ngIf="node.data.isEnd"><i class="pi pi-stop-circle"></i> FIN</div>
+            <!-- Soporte para pTemplate="node" (PrimeNG 18+) -->
+            <ng-template let-node pTemplate="node">
+              <div class="node-box" [class.node-start]="node.data?.isStart" [class.node-end]="node.data?.isEnd">
+                <div class="node-badge" *ngIf="node.data?.isStart"><i class="pi pi-play-circle"></i> INICIO</div>
+                <div class="node-badge" *ngIf="node.data?.isEnd"><i class="pi pi-stop-circle"></i> FIN</div>
                 
                 <h4 class="node-name">{{ node.label }}</h4>
-                <div class="node-dept"><i class="pi pi-map-marker"></i> {{ node.data.department?.name || 'Cargando...' }}</div>
+                <div class="node-dept"><i class="pi pi-map-marker"></i> {{ node.data?.department?.name || 'Cargando...' }}</div>
                 
                 <div class="node-details">
-                  <span><i class="pi pi-clock"></i> Máx: {{ node.data.maxHours }} hrs</span>
-                  <span><i class="pi pi-file"></i> Req: {{ node.data.requiredDocTypes?.length || 0 }}</span>
+                  <span><i class="pi pi-clock"></i> Máx: {{ node.data?.maxHours || 0 }} hrs</span>
+                  <span><i class="pi pi-file"></i> Req: {{ node.data?.requiredDocTypes?.length || 0 }}</span>
                 </div>
 
                 <div class="node-actions mt-2">
                   <button class="p-button p-button-text p-button-sm p-button-info mr-1" (click)="openEditNodeDialog(node.data)" title="Editar Paso del Flujo">
                     <i class="pi pi-pencil"></i>
                   </button>
-                  <button class="p-button p-button-text p-button-sm p-button-danger" (click)="deleteNode(node.data.id)" title="Eliminar Paso de la Ruta">
+                  <button class="p-button p-button-text p-button-sm p-button-danger" (click)="deleteNode(node.data?.id)" title="Eliminar Paso de la Ruta">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+
+            <!-- Soporte para pTemplate="default" (PrimeNG anterior o fallbacks) -->
+            <ng-template let-node pTemplate="default">
+              <div class="node-box" [class.node-start]="node.data?.isStart" [class.node-end]="node.data?.isEnd">
+                <div class="node-badge" *ngIf="node.data?.isStart"><i class="pi pi-play-circle"></i> INICIO</div>
+                <div class="node-badge" *ngIf="node.data?.isEnd"><i class="pi pi-stop-circle"></i> FIN</div>
+                
+                <h4 class="node-name">{{ node.label }}</h4>
+                <div class="node-dept"><i class="pi pi-map-marker"></i> {{ node.data?.department?.name || 'Cargando...' }}</div>
+                
+                <div class="node-details">
+                  <span><i class="pi pi-clock"></i> Máx: {{ node.data?.maxHours || 0 }} hrs</span>
+                  <span><i class="pi pi-file"></i> Req: {{ node.data?.requiredDocTypes?.length || 0 }}</span>
+                </div>
+
+                <div class="node-actions mt-2">
+                  <button class="p-button p-button-text p-button-sm p-button-info mr-1" (click)="openEditNodeDialog(node.data)" title="Editar Paso del Flujo">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="p-button p-button-text p-button-sm p-button-danger" (click)="deleteNode(node.data?.id)" title="Eliminar Paso de la Ruta">
                     <i class="pi pi-trash"></i>
                   </button>
                 </div>
@@ -125,6 +160,33 @@ import { CatalogService } from '../services/catalog.service.js';
             </button>
             <button class="p-button p-button-success" [disabled]="!newFlow.name || !newFlow.procedureTypeId" (click)="createFlow()">
               <i class="pi pi-check mr-1"></i> Crear y Guardar Flujo
+            </button>
+          </div>
+        </div>
+      </p-dialog>
+
+      <!-- Diálogo: Editar Flujo Existente -->
+      <p-dialog header="Editar Flujo de Trámite" [(visible)]="showEditFlowDialog" [modal]="true" [style]="{width: '500px'}">
+        <div class="dialog-form">
+          <div class="form-field mb-2">
+            <label>Nombre del Flujo *</label>
+            <input type="text" pInputText [(ngModel)]="editFlowForm.name" placeholder="Nombre del flujo..." class="w-full" />
+          </div>
+          <div class="form-field mb-2">
+            <label>Descripción</label>
+            <input type="text" pInputText [(ngModel)]="editFlowForm.description" placeholder="Descripción..." class="w-full" />
+          </div>
+          <div class="form-field mb-3">
+            <label>Tipo de Trámite Asociado *</label>
+            <p-select [options]="procedureTypes" [(ngModel)]="editFlowForm.procedureTypeId" optionLabel="name" optionValue="id" placeholder="Asociar a trámite..." styleClass="w-full" appendTo="body"></p-select>
+          </div>
+          
+          <div class="dialog-actions mt-4">
+            <button class="p-button p-button-text p-button-secondary mr-2" (click)="showEditFlowDialog = false">
+              <i class="pi pi-times mr-1"></i> Cancelar
+            </button>
+            <button class="p-button p-button-primary" [disabled]="!editFlowForm.name || !editFlowForm.procedureTypeId" (click)="updateFlow()">
+              <i class="pi pi-check mr-1"></i> Guardar Cambios
             </button>
           </div>
         </div>
@@ -351,8 +413,16 @@ export class WorkflowDesignerComponent implements OnInit {
   // Dialog states
   showCreateFlowDialog = false;
   showNodeDialog = false;
+  showEditFlowDialog = false;
 
   newFlow = {
+    name: '',
+    description: '',
+    procedureTypeId: ''
+  };
+
+  editFlowForm = {
+    id: '',
     name: '',
     description: '',
     procedureTypeId: ''
@@ -375,7 +445,8 @@ export class WorkflowDesignerComponent implements OnInit {
     private http: HttpClient,
     private departmentService: DepartmentService,
     private catalogService: CatalogService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -386,19 +457,28 @@ export class WorkflowDesignerComponent implements OnInit {
 
   loadWorkflows() {
     this.http.get<any[]>('http://localhost:3001/api/workflows').subscribe({
-      next: (res) => this.workflows = res
+      next: (res) => {
+        this.workflows = res;
+        this.cdr.detectChanges();
+      }
     });
   }
 
   loadProcedureTypes() {
     this.catalogService.getProcedureTypes().subscribe({
-      next: (res) => this.procedureTypes = res.filter(t => t.isActive)
+      next: (res) => {
+        this.procedureTypes = res.filter(t => t.isActive);
+        this.cdr.detectChanges();
+      }
     });
   }
 
   loadDepartments() {
     this.departmentService.getDepartments().subscribe({
-      next: (res) => this.departments = res
+      next: (res) => {
+        this.departments = res;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -408,11 +488,13 @@ export class WorkflowDesignerComponent implements OnInit {
         next: (flow) => {
           this.selectedFlow = flow;
           this.buildChartData();
+          this.cdr.detectChanges();
         }
       });
     } else {
       this.selectedFlow = null;
       this.chartData = [];
+      this.cdr.detectChanges();
     }
   }
 
@@ -452,6 +534,7 @@ export class WorkflowDesignerComponent implements OnInit {
     this.http.put(`http://localhost:3001/api/workflows/${this.selectedFlow.id}`, { isActive: status }).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Estado Actualizado', detail: `El flujo ha sido ${status ? 'activado' : 'desactivado'}.` });
+        this.cdr.detectChanges();
         this.loadWorkflows();
         this.onFlowSelect();
       }
@@ -461,6 +544,7 @@ export class WorkflowDesignerComponent implements OnInit {
   openCreateFlowDialog() {
     this.newFlow = { name: '', description: '', procedureTypeId: '' };
     this.showCreateFlowDialog = true;
+    this.cdr.detectChanges();
   }
 
   createFlow() {
@@ -468,12 +552,42 @@ export class WorkflowDesignerComponent implements OnInit {
       next: (res: any) => {
         this.showCreateFlowDialog = false;
         this.messageService.add({ severity: 'success', summary: 'Creado', detail: 'Flujo de trámite creado con éxito.' });
+        this.cdr.detectChanges();
         this.loadWorkflows();
         this.selectedFlowId = res.id;
         this.onFlowSelect();
       },
       error: (err) => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.error || 'No se pudo crear.' });
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  openEditFlowDialog() {
+    if (!this.selectedFlow) return;
+    this.editFlowForm = {
+      id: this.selectedFlow.id,
+      name: this.selectedFlow.name,
+      description: this.selectedFlow.description || '',
+      procedureTypeId: this.selectedFlow.procedureTypeId
+    };
+    this.showEditFlowDialog = true;
+    this.cdr.detectChanges();
+  }
+
+  updateFlow() {
+    this.http.put(`http://localhost:3001/api/workflows/${this.editFlowForm.id}`, this.editFlowForm).subscribe({
+      next: () => {
+        this.showEditFlowDialog = false;
+        this.messageService.add({ severity: 'success', summary: 'Actualizado', detail: 'Flujo de trámite actualizado con éxito.' });
+        this.cdr.detectChanges();
+        this.loadWorkflows();
+        this.onFlowSelect();
+      },
+      error: (err: any) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.error || 'No se pudo actualizar el flujo.' });
+        this.cdr.detectChanges();
       }
     });
   }
@@ -491,6 +605,7 @@ export class WorkflowDesignerComponent implements OnInit {
       typeEnvio: 'PARA'
     };
     this.showNodeDialog = true;
+    this.cdr.detectChanges();
   }
 
   openEditNodeDialog(node: any) {
@@ -506,6 +621,7 @@ export class WorkflowDesignerComponent implements OnInit {
       typeEnvio: node.typeEnvio || 'PARA'
     };
     this.showNodeDialog = true;
+    this.cdr.detectChanges();
   }
 
   saveNode() {
@@ -517,10 +633,12 @@ export class WorkflowDesignerComponent implements OnInit {
         next: () => {
           this.showNodeDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Actualizado', detail: 'Nodo de flujo modificado.' });
+          this.cdr.detectChanges();
           this.onFlowSelect();
         },
         error: (err) => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.error || 'No se pudo actualizar.' });
+          this.cdr.detectChanges();
         }
       });
     } else {
@@ -529,10 +647,12 @@ export class WorkflowDesignerComponent implements OnInit {
         next: () => {
           this.showNodeDialog = false;
           this.messageService.add({ severity: 'success', summary: 'Agregado', detail: 'Nodo de flujo agregado al final.' });
+          this.cdr.detectChanges();
           this.onFlowSelect();
         },
         error: (err) => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.error || 'No se pudo guardar.' });
+          this.cdr.detectChanges();
         }
       });
     }
@@ -543,7 +663,12 @@ export class WorkflowDesignerComponent implements OnInit {
     this.http.delete(`http://localhost:3001/api/workflows/${this.selectedFlow.id}/nodes/${nodeId}`).subscribe({
       next: () => {
         this.messageService.add({ severity: 'warn', summary: 'Eliminado', detail: 'El nodo ha sido removido de la ruta.' });
+        this.cdr.detectChanges();
         this.onFlowSelect();
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.error || 'No se pudo eliminar.' });
+        this.cdr.detectChanges();
       }
     });
   }

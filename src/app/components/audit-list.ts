@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { AuditService } from '../services/audit.service.js';
@@ -124,7 +124,7 @@ import { AuditService } from '../services/audit.service.js';
 export class AuditListComponent implements OnInit {
   logs: any[] = [];
 
-  constructor(private auditService: AuditService) {}
+  constructor(private auditService: AuditService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.loadLogs();
@@ -132,7 +132,10 @@ export class AuditListComponent implements OnInit {
 
   loadLogs() {
     this.auditService.getAuditLogs().subscribe({
-      next: (res) => this.logs = res,
+      next: (res) => {
+        this.logs = res;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error loading audit logs', err)
     });
   }

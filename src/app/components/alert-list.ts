@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
@@ -147,7 +147,8 @@ export class AlertListComponent implements OnInit {
 
   constructor(
     private alertService: AlertService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -156,7 +157,10 @@ export class AlertListComponent implements OnInit {
 
   loadAlerts() {
     this.alertService.getAlerts().subscribe({
-      next: (res) => this.alerts = res,
+      next: (res) => {
+        this.alerts = res;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error al cargar alertas', err)
     });
   }
@@ -177,6 +181,7 @@ export class AlertListComponent implements OnInit {
           summary: 'Error',
           detail: err.error?.error || 'No se pudo resolver la alerta.'
         });
+        this.cdr.detectChanges();
       }
     });
   }

@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Card } from 'primeng/card';
 import { Button } from 'primeng/button';
@@ -76,6 +77,34 @@ import { DepartmentService } from '../services/department.service.js';
 
       <!-- TAB CONTENT: RESUMEN -->
       <div *ngIf="activeTab === 'summary'" class="tab-pane-content">
+        <!-- RUTA DE APROBACIÓN DE FLUJO -->
+        <p-card *ngIf="workflowSteps && workflowSteps.length > 0" styleClass="info-card mb-4" header="Ruta de Firmas y Aprobaciones del Flujo">
+          <div class="workflow-stepper">
+            <div *ngFor="let step of workflowSteps; let i = index; let last = last" class="step-item" [ngClass]="step.status.toLowerCase()">
+              <div class="step-icon-wrapper">
+                <div class="step-icon">
+                  <i class="pi" [ngClass]="step.status === 'APPROVED' ? 'pi-check' : step.status === 'PENDING' ? 'pi-clock' : 'pi-lock'"></i>
+                </div>
+                <div *ngIf="!last" class="step-connector" [ngClass]="{'connector-active': step.status === 'APPROVED'}"></div>
+              </div>
+              <div class="step-details">
+                <h4 class="step-dept">{{ step.departmentName }}</h4>
+                <p class="step-node-name">{{ step.nodeName }}</p>
+                <div class="step-meta" *ngIf="step.status === 'APPROVED'">
+                  <span class="signer-name"><i class="pi pi-user text-xs"></i> {{ step.approvedBy }}</span>
+                  <span class="signed-date"><i class="pi pi-calendar text-xs"></i> {{ step.approvedAt | date:'short' }}</span>
+                </div>
+                <div class="step-meta pending-meta" *ngIf="step.status === 'PENDING'">
+                  <span class="signer-pending"><i class="pi pi-spin pi-spinner text-xs"></i> Pendiente de Firma</span>
+                </div>
+                <div class="step-meta waiting-meta" *ngIf="step.status === 'WAITING'">
+                  <span class="signer-waiting">Bloqueado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-card>
+
         <div class="detail-grid">
           <div class="info-column">
             <p-card styleClass="info-card" header="Metadatos Generales">
@@ -104,7 +133,7 @@ import { DepartmentService } from '../services/department.service.js';
                   <span class="label">Estado Actual:</span>
                   <span class="val">
                     <span class="status-badge" [ngClass]="getStatusClass(document.status)">
-                      {{ document.status }}
+                      {{ getFriendlyStatus(document) }}
                     </span>
                   </span>
                 </div>
@@ -169,6 +198,30 @@ import { DepartmentService } from '../services/department.service.js';
 
                 <!-- CUERPO DE DOCUMENTO PROCESADO -->
                 <div class="pdf-body" [innerHTML]="processedContent"></div>
+
+                <!-- FIRMAS PREVIAS EN EL DOCUMENTO -->
+                <ng-container *ngIf="document?.signatures">
+                  <div 
+                    *ngFor="let sig of document.signatures"
+                    class="visual-signature-stamp-overlay" 
+                    [style.left.%]="sig.x" 
+                    [style.top.%]="sig.y"
+                    style="transform: translate(-50%, -50%); pointer-events: none;"
+                  >
+                    <div class="stamp-box">
+                      <div class="stamp-qr" style="display: flex; align-items: center;">
+                        <img [src]="getQrCodeUrlForSigner(sig.signerName, sig.date)" alt="QR" style="width: 55px; height: 55px; border: 1px solid #a7f3d0; border-radius: 4px;" />
+                      </div>
+                      <div class="stamp-details">
+                        <span class="stamp-title">FIRMADO ELECTRÓNICAMENTE</span>
+                        <strong class="stamp-name">{{ sig.signerName }}</strong>
+                        <span class="stamp-meta">Cargo: {{ sig.signerRole }}</span>
+                        <span class="stamp-meta">Fecha: {{ sig.date | date:'yyyy-MM-dd HH:mm' }}</span>
+                        <span class="stamp-meta">Entidad: GAD Municipal Junín</span>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
 
                 <!-- PIE DE PÁGINA OFICIAL JUNÍN -->
                 <div class="pdf-footer">
@@ -244,7 +297,7 @@ import { DepartmentService } from '../services/department.service.js';
             <div *ngIf="canSubmit()" class="workflow-action-box">
               <p>Este documento se encuentra en borrador. Envíalo para que tu superior directo lo revise.</p>
               <p-button 
-                label="Enviar a Revisión de Jefatura" 
+                [label]="submitButtonLabel" 
                 icon="pi pi-send" 
                 styleClass="p-button-success w-full"
                 (click)="onSubmitForApproval()"
@@ -419,6 +472,30 @@ import { DepartmentService } from '../services/department.service.js';
               <!-- CUERPO DE DOCUMENTO PROCESADO -->
               <div class="pdf-body" [innerHTML]="processedContent"></div>
 
+              <!-- FIRMAS PREVIAS EN EL DOCUMENTO (DENTRO DEL MODAL) -->
+              <ng-container *ngIf="document?.signatures">
+                <div 
+                  *ngFor="let sig of document.signatures"
+                  class="visual-signature-stamp-overlay" 
+                  [style.left.%]="sig.x" 
+                  [style.top.%]="sig.y"
+                  style="transform: translate(-50%, -50%); pointer-events: none;"
+                >
+                  <div class="stamp-box">
+                    <div class="stamp-qr" style="display: flex; align-items: center;">
+                      <img [src]="getQrCodeUrlForSigner(sig.signerName, sig.date)" alt="QR" style="width: 55px; height: 55px; border: 1px solid #a7f3d0; border-radius: 4px;" />
+                    </div>
+                    <div class="stamp-details">
+                      <span class="stamp-title">FIRMADO ELECTRÓNICAMENTE</span>
+                      <strong class="stamp-name">{{ sig.signerName }}</strong>
+                      <span class="stamp-meta">Cargo: {{ sig.signerRole }}</span>
+                      <span class="stamp-meta">Fecha: {{ sig.date | date:'yyyy-MM-dd HH:mm' }}</span>
+                      <span class="stamp-meta">Entidad: GAD Municipal Junín</span>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
               <!-- FIRMA ELECTRÓNICA VISUAL DENTRO DE LA HOJA (DENTRO DEL MODAL) -->
               <div 
                 *ngIf="signaturePos" 
@@ -475,8 +552,8 @@ import { DepartmentService } from '../services/department.service.js';
       </p-dialog>
 
       <!-- CONTENEDOR OCULTO PARA GENERACIÓN DE PDF (Con layout activo para html2pdf) -->
-      <div style="position: absolute; left: -9999px; top: -9999px; overflow: hidden; width: 210mm; min-height: 297mm; background: #ffffff;">
-        <div id="pdf-content-area" class="a4-sheet pdf-preview-sheet" style="box-shadow: none !important; border-radius: 0 !important; width: 210mm; min-height: 297mm; padding: 25mm; box-sizing: border-box; background: #ffffff; color: #1e293b;">
+      <div style="position: absolute; left: -9999px; top: -9999px; overflow: hidden; width: 210mm; height: 296mm; background: #ffffff;">
+        <div id="pdf-content-area" class="a4-sheet pdf-preview-sheet" style="box-shadow: none !important; border-radius: 0 !important; width: 210mm; height: 296mm; min-height: 296mm; max-height: 296mm; padding: 25mm; box-sizing: border-box; background: #ffffff; color: #1e293b; overflow: hidden; position: relative;">
           <!-- MEMBRETE OFICIAL JUNÍN -->
           <div class="pdf-header">
             <div class="header-top">
@@ -497,6 +574,30 @@ import { DepartmentService } from '../services/department.service.js';
 
           <!-- CUERPO DE DOCUMENTO PROCESADO -->
           <div class="pdf-body" [innerHTML]="processedContent"></div>
+
+          <!-- FIRMAS PREVIAS EN EL DOCUMENTO -->
+          <ng-container *ngIf="document?.signatures">
+            <div 
+              *ngFor="let sig of document.signatures"
+              class="visual-signature-stamp-overlay" 
+              [style.left.%]="sig.x" 
+              [style.top.%]="sig.y"
+              style="transform: translate(-50%, -50%); pointer-events: none;"
+            >
+              <div class="stamp-box">
+                <div class="stamp-qr" style="display: flex; align-items: center;">
+                  <img [src]="getQrCodeUrlForSigner(sig.signerName, sig.date)" alt="QR" style="width: 55px; height: 55px; border: 1px solid #a7f3d0; border-radius: 4px;" />
+                </div>
+                <div class="stamp-details">
+                  <span class="stamp-title">FIRMADO ELECTRÓNICAMENTE</span>
+                  <strong class="stamp-name">{{ sig.signerName }}</strong>
+                  <span class="stamp-meta">Cargo: {{ sig.signerRole }}</span>
+                  <span class="stamp-meta">Fecha: {{ sig.date | date:'yyyy-MM-dd HH:mm' }}</span>
+                  <span class="stamp-meta">Entidad: GAD Municipal Junín</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
 
           <!-- FIRMA ELECTRÓNICA VISUAL DENTRO DE LA HOJA -->
           <div 
@@ -1024,13 +1125,150 @@ import { DepartmentService } from '../services/department.service.js';
       font-size: 6.5pt;
       color: #374151;
     }
+
+    /* Estilos de Ruta de Aprobación */
+    .workflow-stepper {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0.5rem;
+      overflow-x: auto;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      text-align: center;
+      min-width: 140px;
+      position: relative;
+    }
+    .step-icon-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    .step-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      font-size: 0.9rem;
+      border: 2px solid;
+      transition: all 0.3s;
+    }
+    .step-connector {
+      position: absolute;
+      left: calc(50% + 16px);
+      right: calc(-50% + 16px);
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 1;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: background 0.3s;
+    }
+    .connector-active {
+      background: #10b981 !important;
+    }
+    
+    .step-item.approved .step-icon {
+      background: #064e3b;
+      border-color: #10b981;
+      color: #34d399;
+    }
+    .step-item.pending .step-icon {
+      background: #78350f;
+      border-color: #f59e0b;
+      color: #fbbf24;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+    }
+    .step-item.waiting .step-icon {
+      background: #1e293b;
+      border-color: #475569;
+      color: #94a3b8;
+    }
+    
+    .step-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: center;
+    }
+    .step-dept {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin: 0;
+    }
+    .step-node-name {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin: 0;
+    }
+    .step-meta {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.65rem;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .step-meta i {
+      margin-right: 2px;
+    }
+    .pending-meta {
+      border-color: rgba(245, 158, 11, 0.2);
+      background: rgba(245, 158, 11, 0.05);
+    }
+    .signer-pending {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+    .signer-waiting {
+      color: #64748b;
+    }
   `]
 })
 export class DocumentDetailComponent implements OnInit {
   activeTab = 'summary';
   document: any = null;
+  workflowSteps: any[] = [];
   departments: any[] = [];
   deptUsers: any[] = [];
+  submitButtonLabel = 'Enviar a Revisión de Jefatura';
+
+  getFriendlyStatus(doc: any): string {
+    if (!doc) return '';
+    const status = doc.status;
+    if (status === 'PENDING_LEADER') {
+      const deptName = doc.procedure?.department?.name || doc.department?.name || 'Jefatura';
+      return `Pendiente Firma: ${deptName}`;
+    }
+    if (status === 'PENDING_MAYOR') {
+      return 'Pendiente Firma: Alcalde';
+    }
+    if (status === 'DRAFT') return 'Borrador';
+    if (status === 'APPROVED') return 'Aprobado';
+    if (status === 'REJECTED') return 'Devuelto para Corrección';
+    if (status === 'SENT_TO_DEPT') {
+      return `Derivado a Depto`;
+    }
+    if (status === 'ASSIGNED_TO_EMPLOYEE') return 'Asignado a Funcionario';
+    if (status === 'RESPONDED') return 'Respondido';
+    return status;
+  }
   
   // Selection
   selectedDept = null;
@@ -1058,7 +1296,8 @@ export class DocumentDetailComponent implements OnInit {
     private router: Router,
     private messageService: MessageService,
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -1133,6 +1372,64 @@ export class DocumentDetailComponent implements OnInit {
         }
       });
     }
+
+    // Buscar si el trámite asociado tiene un flujo activo para mostrar el texto de envío correcto
+    if (this.document && this.document.procedure) {
+      const procTypeId = this.document.procedure.typeId;
+      this.http.get<any[]>('http://localhost:3001/api/workflows').subscribe({
+        next: (flows) => {
+          const activeFlow = flows.find(f => f.procedureTypeId === procTypeId && f.isActive);
+          if (activeFlow && activeFlow.nodes && activeFlow.nodes.length > 0) {
+            this.submitButtonLabel = 'Enviar a la Siguiente Persona en la Secuencia del Flujo';
+            
+            // Ordenar los nodos cronológicamente por su fecha de creación
+            const sortedNodes = [...activeFlow.nodes].sort((a: any, b: any) => 
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+
+            const currentDeptId = this.document.procedure?.departmentId;
+
+            // Mapear cada nodo a su estado en el flujo actual
+            this.workflowSteps = sortedNodes.map((node: any) => {
+              // Buscar en el historial de ruta si este departamento ya firmó/aprobó el documento
+              const approval = this.document.history?.find((h: any) => 
+                h.action === 'APPROVE' && h.user?.departmentId === node.departmentId
+              );
+
+              let status: 'APPROVED' | 'PENDING' | 'WAITING' = 'WAITING';
+              
+              if (approval) {
+                status = 'APPROVED';
+              } else if (node.departmentId === currentDeptId && this.document.status === 'PENDING_LEADER') {
+                status = 'PENDING';
+              }
+
+              return {
+                departmentName: node.department?.name || 'Departamento',
+                nodeName: node.name,
+                status,
+                approvedBy: approval ? approval.user?.name : null,
+                approvedAt: approval ? approval.createdAt : null
+              };
+            });
+          } else {
+            const targetDeptName = this.document.procedure?.department?.name;
+            this.submitButtonLabel = targetDeptName ? `Enviar a Revisión de ${targetDeptName}` : 'Enviar a Revisión de Jefatura';
+            this.workflowSteps = [];
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          const targetDeptName = this.document.procedure?.department?.name;
+          this.submitButtonLabel = targetDeptName ? `Enviar a Revisión de ${targetDeptName}` : 'Enviar a Revisión de Jefatura';
+          this.workflowSteps = [];
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      this.submitButtonLabel = 'Enviar a Revisión de Jefatura';
+      this.workflowSteps = [];
+    }
   }
 
   getPdfUrl() {
@@ -1140,7 +1437,10 @@ export class DocumentDetailComponent implements OnInit {
     const cleanUrl = this.document.fileUrl.startsWith('/') 
       ? this.document.fileUrl.replace(/^\/+/, '') 
       : this.document.fileUrl;
-    return `http://localhost:3001/${cleanUrl}`;
+    
+    // Evitar almacenamiento en caché agregando timestamp de actualización
+    const timestamp = this.document.updatedAt ? new Date(this.document.updatedAt).getTime() : new Date().getTime();
+    return `http://localhost:3001/${cleanUrl}?t=${timestamp}`;
   }
 
   getSafePdfUrl(): SafeResourceUrl {
@@ -1169,24 +1469,28 @@ export class DocumentDetailComponent implements OnInit {
     if (isConfidential) {
       return this.document.status === 'PENDING_MAYOR' && this.authService.isMayor();
     } else {
+      const targetDeptId = this.document.procedure ? this.document.procedure.departmentId : this.document.departmentId;
+      const isAuthorizedUser = this.authService.isLeader() || this.authService.isMayor();
       return this.document.status === 'PENDING_LEADER' && 
-             this.authService.isLeader() && 
-             this.document.departmentId === user.department?.id;
+             isAuthorizedUser && 
+             targetDeptId === user.department?.id;
     }
   }
 
   canSendInterdept(): boolean {
     const user = this.authService.currentUser()!;
+    const isAuthorizedUser = this.authService.isLeader() || this.authService.isMayor();
     return this.document.status === 'APPROVED' && 
-           this.authService.isLeader() && 
+           isAuthorizedUser && 
            this.document.departmentId === user.department?.id &&
            !this.document.isConfidential;
   }
 
   canAssignInterdept(): boolean {
     const user = this.authService.currentUser()!;
+    const isAuthorizedUser = this.authService.isLeader() || this.authService.isMayor();
     return this.document.status === 'SENT_TO_DEPT' && 
-           this.authService.isLeader() && 
+           isAuthorizedUser && 
            this.document.targetDepartmentId === user.department?.id;
   }
 
@@ -1212,14 +1516,16 @@ export class DocumentDetailComponent implements OnInit {
 
   onModalSheetClick(event: MouseEvent) {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    let x = ((event.clientX - rect.left) / rect.width) * 100;
+    let y = ((event.clientY - rect.top) / rect.height) * 100;
 
-    // Calcular coordenadas porcentuales relativas al tamaño del contenedor para precisión perfecta
-    this.signaturePos = { 
-      x: (x / rect.width) * 100, 
-      y: (y / rect.height) * 100 
-    };
+    // Restringir coordenadas para evitar desborde del sello y generación de hojas en blanco
+    if (x < 12) x = 12;
+    if (x > 88) x = 88;
+    if (y < 15) y = 15;
+    if (y > 83) y = 83; // Margen de seguridad inferior para evitar empujar el pie de página
+
+    this.signaturePos = { x, y };
     this.signatureDate = new Date();
     this.cdr.detectChanges();
   }
@@ -1233,6 +1539,12 @@ export class DocumentDetailComponent implements OnInit {
     const user = this.getCurrentUser();
     const dateStr = this.signatureDate ? this.signatureDate.toISOString() : new Date().toISOString();
     const qrData = `FIRMADO ELECTRONICAMENTE\nFirmante: ${user?.name || ''}\nFecha: ${dateStr}\nValidador: G-DOC GAD JUNIN\nDocID: ${this.document.id}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+  }
+
+  getQrCodeUrlForSigner(signerName: string, date: string): string {
+    if (!this.document) return '';
+    const qrData = `FIRMADO ELECTRONICAMENTE\nFirmante: ${signerName}\nFecha: ${date}\nValidador: G-DOC GAD JUNIN\nDocID: ${this.document.id}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
   }
 
@@ -1276,7 +1588,8 @@ export class DocumentDetailComponent implements OnInit {
       filename:     `DOCUMENTO_${this.document.id.substring(0,8).toUpperCase()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: ['avoid-all', 'css'] }
     };
 
     if (!(window as any).html2pdf) {
@@ -1292,6 +1605,8 @@ export class DocumentDetailComponent implements OnInit {
       formData.append('file', pdfBlob, `DOCUMENTO_${this.document.id.substring(0,8).toUpperCase()}.pdf`);
       formData.append('certificate', this.certificateFile!);
       formData.append('password', this.certPassword);
+      formData.append('signaturePos', JSON.stringify(this.signaturePos));
+      formData.append('signatureDate', this.signatureDate ? this.signatureDate.toISOString() : new Date().toISOString());
 
       this.documentService.signAndApproveDocument(this.document.id, formData).subscribe({
         next: () => {
