@@ -13,6 +13,7 @@ import { CatalogService } from '../services/catalog.service.js';
 import { DepartmentService } from '../services/department.service.js';
 import { DocumentService } from '../services/document.service.js';
 import { TemplateService } from '../services/template.service.js';
+import { AuthService } from '../services/auth.service.js';
 import { RichEditorComponent } from './rich-editor.js';
 import { ChangeDetectorRef } from '@angular/core';
 
@@ -77,7 +78,7 @@ import { ChangeDetectorRef } from '@angular/core';
               <div class="form-field full-width">
                 <label for="type">Tipo de Trámite *</label>
                 <p-select 
-                  [options]="types" 
+                  [options]="availableTypes" 
                   [(ngModel)]="selectedType" 
                   name="type"
                   optionLabel="name" 
@@ -799,6 +800,7 @@ export class ProcedureCreateComponent implements OnInit {
     private departmentService: DepartmentService,
     private documentService: DocumentService,
     private templateService: TemplateService,
+    private authService: AuthService,
     private http: HttpClient,
     private router: Router,
     private messageService: MessageService,
@@ -840,6 +842,25 @@ export class ProcedureCreateComponent implements OnInit {
   loadTemplates() {
     this.templateService.getTemplates().subscribe({
       next: (res) => { this.templates = res; this.cdr.detectChanges(); }
+    });
+  }
+
+  get availableTypes() {
+    if (!this.types || !this.workflows) return [];
+    const user = this.authService.currentUser();
+    if (!user) return [];
+    
+    if (user.role.name === 'Administrador' || this.authService.hasPermission('all')) {
+      return this.types;
+    }
+
+    return this.types.filter(type => {
+      const workflow = this.workflows.find(w => w.procedureTypeId === type.id);
+      
+      if (!workflow) return true;
+
+      const belongsToDept = workflow.nodes?.some((n: any) => n.departmentId === user.department.id);
+      return belongsToDept;
     });
   }
 

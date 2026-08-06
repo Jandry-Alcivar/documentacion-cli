@@ -74,6 +74,12 @@ import { CatalogService } from '../services/catalog.service.js';
             <button class="p-button p-button-sm p-button-warning mr-2" (click)="openEditFlowDialog()">
               <i class="pi pi-pencil mr-1"></i> Editar Flujo
             </button>
+            <button class="p-button p-button-sm p-button-danger mr-2" 
+                    [disabled]="selectedFlow.inUse" 
+                    [title]="selectedFlow.inUse ? 'No se puede eliminar porque ya tiene trámites' : 'Eliminar Flujo Completamente'"
+                    (click)="deleteFlow()">
+              <i class="pi pi-trash mr-1"></i> Eliminar Flujo
+            </button>
             <button class="p-button p-button-sm p-button-danger p-button-outlined mr-2" *ngIf="selectedFlow.isActive" (click)="toggleFlowStatus(false)">
               <i class="pi pi-ban mr-1"></i> Desactivar Flujo
             </button>
@@ -671,5 +677,23 @@ export class WorkflowDesignerComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  deleteFlow() {
+    if (!this.selectedFlow) return;
+    if (confirm(`¿Estás seguro de que deseas eliminar permanentemente el flujo "${this.selectedFlow.name}"?`)) {
+      this.http.delete(`http://localhost:3001/api/workflows/${this.selectedFlow.id}`).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'El flujo ha sido eliminado.' });
+          this.selectedFlow = null;
+          this.selectedFlowId = null;
+          this.loadWorkflows();
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.error || 'No se pudo eliminar el flujo.' });
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 }
