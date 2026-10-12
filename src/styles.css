@@ -1,200 +1,363 @@
 @import "primeicons/primeicons.css";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Paleta Gubernamental & Institucional G-DOC */
+  --bg-app: #f1f5f9;
+  --panel-bg: #ffffff;
+  --panel-border: #e2e8f0;
+  
+  --gov-navy-dark: #0a1626;
+  --gov-navy: #0f2137;
+  --gov-navy-light: #1e3a5f;
+  
+  --gov-blue: #1d4ed8;
+  --gov-blue-hover: #1e40af;
+  --gov-blue-light: #eff6ff;
+  --gov-blue-border: #bfdbfe;
+  
+  --text-main: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  
+  /* Estados Funcionales Oficiales */
+  --status-ok-bg: #ecfdf5;
+  --status-ok-text: #047857;
+  --status-ok-border: #a7f3d0;
+  
+  --status-warn-bg: #fffbeb;
+  --status-warn-text: #b45309;
+  --status-warn-border: #fde68a;
+  
+  --status-danger-bg: #fef2f2;
+  --status-danger-text: #b91c1c;
+  --status-danger-border: #fecaca;
+  
+  --status-info-bg: #eff6ff;
+  --status-info-text: #1d4ed8;
+  --status-info-border: #bfdbfe;
+  
+  --status-purple-bg: #f5f3ff;
+  --status-purple-text: #6d28d9;
+  --status-purple-border: #ddd6fe;
+
+  --card-radius: 10px;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}
 
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #0f172a;
-  color: #f8fafc;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
   box-sizing: border-box;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 *, *:before, *:after {
   box-sizing: inherit;
 }
 
-/* Custom global styles overrides for PrimeNG styling preset compatibility */
-body {
-  overflow-x: hidden;
-}
-
-/* Animations */
+/* Animaciones */
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.25s ease-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.w-full {
-  width: 100% !important;
-}
+/* Utilidades Globales */
+.w-full { width: 100% !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 0.8rem !important; }
+.mr-1 { margin-right: 0.25rem !important; }
+.mr-2 { margin-right: 0.5rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.font-semibold { font-weight: 600 !important; }
+.font-bold { font-weight: 700 !important; }
+.font-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important; }
+.text-dark { color: #0f172a !important; }
+.text-main { color: #0f172a !important; }
+.text-muted { color: #64748b !important; }
+.text-white { color: #ffffff !important; }
+.text-red { color: #dc2626 !important; }
+.text-blue { color: #1d4ed8 !important; }
+.text-green { color: #047857 !important; }
+.text-center { text-align: center !important; }
+.flex-grow { flex-grow: 1 !important; }
 
-.mb-2 {
-  margin-bottom: 0.5rem !important;
-}
-
-.mb-3 {
-  margin-bottom: 0.8rem !important;
-}
-
-.mr-2 {
-  margin-right: 0.5rem !important;
-}
-
-.mt-3 {
-  margin-top: 1rem !important;
-}
-
-.font-semibold {
-  font-weight: 600 !important;
-}
-
-.font-mono {
-  font-family: 'Courier New', Courier, monospace !important;
-}
-
-.text-white {
-  color: #ffffff !important;
-}
-
-.text-red {
-  color: #f87171 !important;
-}
-
-.text-center {
-  text-align: center !important;
-}
-
-.flex-grow {
-  flex-grow: 1 !important;
-}
-
-/* Status Badges */
+/* Status Badges Institucionales */
 .status-badge {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 6px;
   text-transform: uppercase;
-  display: inline-block;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid transparent;
 }
-.badge-draft { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
-.badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-.badge-approved { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-.badge-rejected { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-.badge-sent { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
 
-/* PrimeNG Dialog (p-dialog) Dark Mode Styling */
+.status-registrado, .badge-sent {
+  background: var(--status-info-bg) !important;
+  color: var(--status-info-text) !important;
+  border-color: var(--status-info-border) !important;
+}
+
+.status-recibido, .badge-draft {
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+  border-color: #bbf7d0 !important;
+}
+
+.status-en-revision, .badge-pending {
+  background: var(--status-warn-bg) !important;
+  color: var(--status-warn-text) !important;
+  border-color: var(--status-warn-border) !important;
+}
+
+.status-derivado {
+  background: var(--status-purple-bg) !important;
+  color: var(--status-purple-text) !important;
+  border-color: var(--status-purple-border) !important;
+}
+
+.status-observado, .badge-rejected {
+  background: var(--status-danger-bg) !important;
+  color: var(--status-danger-text) !important;
+  border-color: var(--status-danger-border) !important;
+}
+
+.status-finalizado, .badge-approved {
+  background: var(--status-ok-bg) !important;
+  color: var(--status-ok-text) !important;
+  border-color: var(--status-ok-border) !important;
+}
+
+/* Prioridad Badges */
+.p-priority {
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  display: inline-block;
+  border: 1px solid transparent;
+}
+.priority-urgente { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.priority-alta { background: #fff7ed; color: #c2410c; border-color: #ffedd5; }
+.priority-normal { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.priority-baja { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+
+/* PrimeNG Table Institucional Light Overrides */
+.p-datatable, .custom-table {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background: #f8fafc !important;
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  font-size: 0.78rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  padding: 0.75rem 1rem !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  background: #ffffff !important;
+  color: #334155 !important;
+  transition: background-color 0.15s ease !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: #f8fafc !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.75rem 1rem !important;
+  border: none !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  font-size: 0.85rem !important;
+  vertical-align: middle !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:last-child > td {
+  border-bottom: none !important;
+}
+
+.p-datatable .p-paginator {
+  background: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+  padding: 0.5rem 1rem !important;
+  color: #64748b !important;
+}
+
+.p-paginator .p-paginator-page, 
+.p-paginator .p-paginator-next, 
+.p-paginator .p-paginator-last, 
+.p-paginator .p-paginator-first, 
+.p-paginator .p-paginator-prev {
+  color: #475569 !important;
+  border-radius: 6px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  font-size: 0.85rem !important;
+}
+
+.p-paginator .p-paginator-page.p-highlight {
+  background: #1d4ed8 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* PrimeNG Dialog (p-dialog) Institucional */
 .p-dialog {
-  background: #1e293b !important; /* Slate 800 */
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #f1f5f9 !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.5) !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.18), 0 10px 15px -5px rgba(0, 0, 0, 0.08) !important;
   border-radius: 12px !important;
+  overflow: hidden !important;
 }
 
 .p-dialog .p-dialog-header {
-  background: #1e293b !important;
-  color: #ffffff !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  padding: 1.25rem 1.5rem !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 1rem 1.4rem !important;
+  font-weight: 700 !important;
 }
 
 .p-dialog .p-dialog-content {
-  background: #1e293b !important;
-  color: #cbd5e1 !important;
-  padding: 1.5rem !important;
+  background: #ffffff !important;
+  color: #334155 !important;
+  padding: 1.4rem !important;
 }
 
 .p-dialog .p-dialog-footer {
-  background: #1e293b !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  padding: 1.25rem 1.5rem !important;
+  background: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+  padding: 1rem 1.4rem !important;
 }
 
 .p-dialog .p-dialog-header-icon {
-  color: #94a3b8 !important;
+  color: #64748b !important;
   background: transparent !important;
   border: none !important;
-  cursor: pointer !important;
-  border-radius: 50% !important;
-  width: 2rem !important;
-  height: 2rem !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.2s !important;
+  border-radius: 6px !important;
 }
 .p-dialog .p-dialog-header-icon:hover {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+  color: #0f172a !important;
+  background: #e2e8f0 !important;
 }
 
-/* Premium Buttons Styling */
+/* Formularios e Inputs Gubernamentales */
+.form-input, input[type="text"], input[type="password"], input[type="email"], input[type="number"], textarea, select {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 7px !important;
+  color: #0f172a !important;
+  padding: 0.55rem 0.8rem !important;
+  font-size: 0.85rem !important;
+  font-family: inherit !important;
+  outline: none !important;
+  transition: all 0.15s ease !important;
+}
+
+.form-input:focus, input:focus, textarea:focus, select:focus {
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12) !important;
+}
+
+/* Botones Institucionales PrimeNG */
 .p-button {
-  border-radius: 8px !important;
+  border-radius: 7px !important;
   font-weight: 600 !important;
-  transition: all 0.2s ease !important;
-}
-
-.p-button-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2) !important;
-}
-.p-button-success:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 12px -1px rgba(16, 185, 129, 0.3) !important;
-}
-
-.p-button-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2) !important;
-}
-.p-button-primary:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 12px -1px rgba(99, 102, 241, 0.3) !important;
-}
-
-.p-button-secondary {
-  background: #334155 !important;
-  border: 1px solid #475569 !important;
-  color: #cbd5e1 !important;
-}
-.p-button-secondary:hover {
-  background: #475569 !important;
-  color: #ffffff !important;
-}
-
-/* PrimeNG Select (p-select) Dropdown Panel Dark Mode Overrides */
-.p-select-overlay, .p-select-panel, .p-dropdown-panel, .p-select-items-wrapper, .p-select-list-container, .p-select-list, .p-select-options {
-  background: #1e293b !important; /* Slate 800 */
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #f8fafc !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
-}
-
-.p-select-item, .p-dropdown-item, .p-select-option {
-  color: #cbd5e1 !important; /* Slate 300 */
-  background: transparent !important;
+  font-size: 0.85rem !important;
   transition: all 0.15s ease !important;
   padding: 0.5rem 1rem !important;
 }
 
-.p-select-item:hover, .p-dropdown-item:hover, .p-select-option:hover, .p-select-option-active {
+.p-button-primary {
+  background: #1d4ed8 !important;
+  border: 1px solid #1e40af !important;
   color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 1px 3px 0 rgba(29, 78, 216, 0.2) !important;
+}
+.p-button-primary:hover {
+  background: #1e40af !important;
+  box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3) !important;
 }
 
-.p-select-item.p-highlight, .p-dropdown-item.p-highlight, .p-select-option.p-highlight, .p-select-option-selected {
+.p-button-success {
+  background: #059669 !important;
+  border: 1px solid #047857 !important;
   color: #ffffff !important;
-  background: #4f46e5 !important; /* Indigo 600 */
+}
+.p-button-success:hover {
+  background: #047857 !important;
+}
+
+.p-button-secondary, .p-button-outlined {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+}
+.p-button-secondary:hover, .p-button-outlined:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.p-button-danger {
+  background: #dc2626 !important;
+  border: 1px solid #b91c1c !important;
+  color: #ffffff !important;
+}
+
+/* PrimeNG Select / Dropdown Institucional */
+.p-select-overlay, .p-select-panel, .p-dropdown-panel, .p-select-list, .p-select-options {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15) !important;
+  border-radius: 8px !important;
+}
+
+.p-select-item, .p-dropdown-item, .p-select-option {
+  color: #334155 !important;
+  background: transparent !important;
+  padding: 0.5rem 0.8rem !important;
+  font-size: 0.85rem !important;
+}
+
+.p-select-item:hover, .p-dropdown-item:hover, .p-select-option:hover {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+
+.p-select-item.p-highlight, .p-dropdown-item.p-highlight {
+  color: #1d4ed8 !important;
+  background: #eff6ff !important;
+  font-weight: 600 !important;
 }

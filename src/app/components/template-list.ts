@@ -37,13 +37,13 @@ import { RichEditorComponent } from './rich-editor.js';
           <h1>Plantillas y Machotes Oficiales</h1>
           <p>Consulta, descarga o administra formatos aprobados para la redacción de documentos formales</p>
         </div>
-        <p-button 
+        <button 
           *ngIf="isAdmin()"
-          label="Nueva Plantilla" 
-          icon="pi pi-plus" 
-          styleClass="p-button-primary btn-create"
+          class="btn-create-template"
           (click)="openNew()"
-        ></p-button>
+        >
+          <i class="pi pi-plus mr-1"></i> Nueva Plantilla
+        </button>
       </div>
 
       <!-- Tabla de Plantillas -->
@@ -61,7 +61,7 @@ import { RichEditorComponent } from './rich-editor.js';
           </ng-template>
           <ng-template pTemplate="body" let-temp>
             <tr>
-              <td class="font-semibold text-white">{{ temp.name }}</td>
+              <td class="font-semibold text-dark">{{ temp.name }}</td>
               <td>{{ temp.type?.name || temp.typeId }}</td>
               <td>
                 <span class="scope-badge" [ngClass]="temp.scope === 'GLOBAL' ? 'scope-global' : 'scope-dept'">
@@ -72,26 +72,28 @@ import { RichEditorComponent } from './rich-editor.js';
               <td>{{ temp.createdBy }}</td>
               <td>
                 <div class="action-buttons">
-                  <p-button 
-                    icon="pi pi-file-edit" 
-                    styleClass="p-button-rounded p-button-text p-button-info" 
+                  <button 
+                    class="btn-action-icon text-blue" 
                     title="Ver/Editar"
                     (click)="openEdit(temp)"
-                  ></p-button>
-                  <p-button 
+                  >
+                    <i class="pi pi-file-edit"></i>
+                  </button>
+                  <button 
                     *ngIf="isAdmin()"
-                    icon="pi pi-trash" 
-                    styleClass="p-button-rounded p-button-text p-button-danger" 
+                    class="btn-action-icon text-red" 
                     title="Eliminar"
                     (click)="onDelete(temp.id)"
-                  ></p-button>
+                  >
+                    <i class="pi pi-trash"></i>
+                  </button>
                 </div>
               </td>
             </tr>
           </ng-template>
           <ng-template pTemplate="emptystate">
             <tr>
-              <td colspan="6" style="text-align: center; padding: 3rem;">No se encontraron plantillas oficiales.</td>
+              <td colspan="6" style="text-align: center; padding: 3rem; color: #94a3b8;">No se encontraron plantillas oficiales.</td>
             </tr>
           </ng-template>
         </p-table>
@@ -178,65 +180,89 @@ import { RichEditorComponent } from './rich-editor.js';
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
     .page-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     .page-header p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      margin: 0.3rem 0 0;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
     }
-    :host ::ng-deep .btn-create {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-      border: none !important;
-      border-radius: 8px !important;
-      padding: 0.6rem 1.2rem !important;
-      font-weight: 600 !important;
+    .btn-create-template {
+      background: #1d4ed8;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-create-template:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
     }
 
     /* Table */
     .table-card {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
-    :host ::ng-deep .custom-table .p-datatable-thead > tr > th {
-      background: #1e293b !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      font-weight: 600 !important;
-      padding: 1rem !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #e2e8f0 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr:hover {
-      background: rgba(255, 255, 255, 0.02) !important;
+    .text-dark {
+      color: #0f172a !important;
     }
 
     /* Scope badges */
     .scope-badge {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 0.2rem 0.5rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
-    .scope-global { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
-    .scope-dept { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .scope-global { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .scope-dept { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
 
     /* Actions */
     .action-buttons {
       display: flex;
-      gap: 0.25rem;
+      gap: 0.35rem;
       justify-content: center;
     }
+    .btn-action-icon {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-action-icon:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      transform: translateY(-1px);
+    }
+    .text-blue { color: #1d4ed8 !important; }
+    .text-red { color: #b91c1c !important; }
 
     /* Form */
     .template-form {
@@ -244,7 +270,7 @@ import { RichEditorComponent } from './rich-editor.js';
       flex-direction: column;
       gap: 1.2rem;
       padding: 0.5rem 0;
-      color: #cbd5e1;
+      color: #0f172a;
     }
     .form-grid {
       display: grid;
@@ -259,26 +285,26 @@ import { RichEditorComponent } from './rich-editor.js';
     .form-field label {
       font-size: 0.85rem;
       font-weight: 600;
+      color: #334155;
     }
     :host ::ng-deep .template-form input {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #f8fafc !important;
-      border-radius: 8px !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      border-radius: 6px !important;
+      height: 38px;
     }
-    :host ::ng-deep .template-form .p-dropdown {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      border-radius: 8px !important;
-    }
-    :host ::ng-deep .template-form .p-dropdown .p-dropdown-label {
-      color: #f8fafc !important;
+    :host ::ng-deep .template-form .p-select {
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 6px !important;
+      height: 38px;
     }
     .form-textarea {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #f8fafc;
-      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
+      border-radius: 6px;
       padding: 0.8rem;
       font-family: inherit;
       resize: vertical;
@@ -289,7 +315,6 @@ import { RichEditorComponent } from './rich-editor.js';
       font-size: 0.9rem;
     }
     .font-semibold { font-weight: 600; }
-    .text-white { color: #ffffff; }
   `]
 })
 export class TemplateListComponent implements OnInit {

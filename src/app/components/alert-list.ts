@@ -14,7 +14,6 @@ import { AlertService } from '../services/alert.service.js';
     CommonModule,
     RouterLink,
     TableModule,
-    Button,
     Toast
   ],
   providers: [MessageService],
@@ -43,32 +42,35 @@ import { AlertService } from '../services/alert.service.js';
           <ng-template pTemplate="body" let-alert>
             <tr class="alert-row">
               <td>{{ alert.createdAt | date:'medium' }}</td>
-              <td class="font-semibold text-white">{{ alert.document?.title }}</td>
+              <td class="font-semibold text-dark">{{ alert.document?.title }}</td>
               <td>{{ alert.user?.name || 'Desconocido' }}</td>
-              <td class="text-red font-semibold"><i class="pi pi-exclamation-triangle"></i> {{ alert.message }}</td>
+              <td class="text-red font-semibold"><i class="pi pi-exclamation-triangle mr-1"></i> {{ alert.message }}</td>
               <td>
                 <div class="action-buttons">
-                  <p-button 
-                    icon="pi pi-eye" 
-                    styleClass="p-button-rounded p-button-text p-button-info" 
+                  <button 
+                    class="btn-action-icon text-blue" 
                     [routerLink]="'/documents/detail/' + alert.document?.id"
                     title="Inspeccionar Documento"
-                  ></p-button>
-                  <p-button 
-                    icon="pi pi-check" 
-                    styleClass="p-button-rounded p-button-text p-button-success" 
+                  >
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button 
+                    class="btn-action-icon text-green" 
                     (click)="onResolve(alert.id)"
                     title="Resolver / Marcar Leída"
-                  ></p-button>
+                  >
+                    <i class="pi pi-check"></i>
+                  </button>
                 </div>
               </td>
             </tr>
           </ng-template>
           <ng-template pTemplate="emptystate">
             <tr>
-              <td colspan="5" style="text-align: center; padding: 3rem;">
-                <i class="pi pi-verified" style="font-size: 2.5rem; color: #10b981; margin-bottom: 0.5rem; display: block;"></i>
-                No se detectaron alteraciones en la integridad de los archivos. Todo está verificado.
+              <td colspan="5" class="empty-state-verified">
+                <i class="pi pi-verified"></i>
+                <p class="font-bold">No se detectaron alteraciones en la integridad de los archivos.</p>
+                <span>Todos los hashes criptográficos SHA256 coinciden con el registro original.</span>
               </td>
             </tr>
           </ng-template>
@@ -84,61 +86,81 @@ import { AlertService } from '../services/alert.service.js';
       font-family: 'Inter', system-ui, sans-serif;
     }
     .page-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     .page-header p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      margin: 0.3rem 0 0;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
     }
 
     /* Table styles */
     .table-card {
-      background: rgba(15, 23, 42, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
-    :host ::ng-deep .custom-table .p-datatable-thead > tr > th {
-      background: rgba(15, 23, 42, 0.6) !important;
-      color: #94a3b8 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-      padding: 1rem !important;
-      font-weight: 600;
+    .text-dark {
+      color: #0f172a !important;
     }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-      transition: background 0.2s;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr:hover {
-      background: rgba(255, 255, 255, 0.02) !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr > td {
-      padding: 1rem !important;
-      border: none !important;
-    }
-
     .alert-row {
-      background: rgba(239, 68, 68, 0.03) !important;
+      background: #fff7ed !important;
     }
     .text-red {
-      color: #f87171 !important;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      color: #b91c1c !important;
     }
+    .text-blue { color: #1d4ed8 !important; }
+    .text-green { color: #047857 !important; }
 
     /* Buttons */
     .action-buttons {
       display: flex;
       justify-content: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
+    }
+    .btn-action-icon {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-action-icon:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      transform: translateY(-1px);
+    }
+    .empty-state-verified {
+      text-align: center;
+      padding: 3.5rem 1rem !important;
+      color: #047857;
+    }
+    .empty-state-verified i {
+      font-size: 2.5rem;
+      color: #059669;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .empty-state-verified p {
+      margin: 0 0 0.25rem;
+      font-size: 1rem;
+      color: #065f46;
+    }
+    .empty-state-verified span {
+      font-size: 0.85rem;
+      color: #64748b;
     }
   `]
 })

@@ -179,32 +179,33 @@ import { AlertService } from '../services/alert.service.js';
     .dashboard-page {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1.5rem;
       font-family: 'Inter', system-ui, sans-serif;
     }
     .welcome-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     .welcome-header p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      margin: 0.3rem 0 0;
+      font-size: 0.92rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
     }
 
     /* Stats Grid Cards */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
     :host ::ng-deep .stat-card {
-      background: rgba(255, 255, 255, 0.03) !important;
-      border: 1px solid rgba(255, 255, 255, 0.06) !important;
-      border-radius: 12px !important;
-      color: #ffffff !important;
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+      color: #0f172a !important;
     }
     .stat-content {
       display: flex;
@@ -215,26 +216,26 @@ import { AlertService } from '../services/alert.service.js';
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border-radius: 10px;
-      font-size: 1.5rem;
+      font-size: 1.35rem;
     }
     .stat-indigo .stat-icon {
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
+      background: #eff6ff;
+      color: #1d4ed8;
     }
     .stat-purple .stat-icon {
-      background: rgba(168, 85, 247, 0.15);
-      color: #c084fc;
+      background: #f5f3ff;
+      color: #6d28d9;
     }
     .stat-red .stat-icon {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
+      background: #fef2f2;
+      color: #b91c1c;
     }
     .stat-green .stat-icon {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
+      background: #ecfdf5;
+      color: #047857;
     }
     .stat-values {
       display: flex;
@@ -244,134 +245,123 @@ import { AlertService } from '../services/alert.service.js';
       font-size: 1.6rem;
       font-weight: 800;
       line-height: 1;
+      color: #0f172a;
     }
     .stat-values .label {
       font-size: 0.8rem;
-      color: #94a3b8;
-      margin-top: 0.3rem;
-      font-weight: 500;
+      color: #64748b;
+      margin-top: 0.35rem;
+      font-weight: 600;
     }
 
     /* Sections */
     .dashboard-sections {
-      margin-top: 1rem;
+      margin-top: 0.5rem;
     }
     .section-card {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     .section-card h3 {
       font-size: 1.1rem;
       font-weight: 700;
-      color: #ffffff;
+      color: #0f172a;
       margin: 0 0 1.2rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
     .section-card h3 i {
-      color: #818cf8;
-    }
-
-    /* Table styles override */
-    :host ::ng-deep .custom-table .p-datatable-thead > tr > th {
-      background: #1e293b !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      font-weight: 600 !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #e2e8f0 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr:hover {
-      background: rgba(255, 255, 255, 0.02) !important;
+      color: #1d4ed8;
     }
 
     /* Badges */
     .badge-op {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 0.2rem 0.5rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 6px;
       text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
-    .badge-create { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
-    .badge-approve { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-    .badge-reject { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-    .badge-alert { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-    .badge-default { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+    .badge-create { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .badge-approve { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .badge-reject { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-alert { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .badge-default { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
     /* Quick Actions */
     .quick-actions-panel {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 1.8rem;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     .quick-actions-panel h2 {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 700;
-      color: #ffffff;
+      color: #0f172a;
       margin: 0 0 1.2rem;
     }
     .actions-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
     }
     .action-item-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      padding: 1.5rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.25rem;
       cursor: pointer;
       transition: all 0.2s;
     }
     .action-item-card:hover {
-      background: rgba(99, 102, 241, 0.05);
-      border-color: rgba(99, 102, 241, 0.2);
+      background: #eff6ff;
+      border-color: #bfdbfe;
       transform: translateY(-2px);
     }
     .action-item-card i {
-      font-size: 2rem;
-      margin-bottom: 0.8rem;
+      font-size: 1.8rem;
+      margin-bottom: 0.6rem;
+      display: inline-block;
     }
     .action-item-card h4 {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      margin: 0 0 0.4rem;
-      color: #ffffff;
+      margin: 0 0 0.35rem;
+      color: #0f172a;
     }
     .action-item-card p {
-      font-size: 0.85rem;
-      color: #94a3b8;
+      font-size: 0.82rem;
+      color: #64748b;
       margin: 0;
       line-height: 1.4;
     }
-    .text-indigo { color: #818cf8; }
-    .text-purple { color: #c084fc; }
-    .text-green { color: #4ade80; }
+    .text-indigo { color: #1d4ed8; }
+    .text-purple { color: #6d28d9; }
+    .text-green { color: #047857; }
 
     :host ::ng-deep .clickable-card {
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s !important;
     }
     :host ::ng-deep .clickable-card:hover {
-      transform: translateY(-3px) !important;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08) !important;
     }
     .card-link-hint {
       margin-left: auto;
-      color: rgba(255,255,255,0.4);
+      color: #94a3b8;
       font-size: 0.9rem;
       transition: color 0.2s, transform 0.2s;
     }
     :host ::ng-deep .clickable-card:hover .card-link-hint {
-      color: rgba(255,255,255,0.8);
+      color: #1d4ed8;
       transform: translateX(3px);
     }
 
@@ -380,7 +370,7 @@ import { AlertService } from '../services/alert.service.js';
       to { opacity: 1; }
     }
     .animate-fade-in {
-      animation: fadeIn 0.4s ease-out;
+      animation: fadeIn 0.3s ease-out;
     }
   `]
 })
@@ -467,10 +457,38 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  private refreshTimer: any;
+  private onFocus = () => this.refresh();
+
+  private refresh() {
+    if (this.isAdmin()) this.loadAdminStats();
+    else if (this.authService.isLoggedIn()) this.loadUserStats();
+  }
+
+  ngAfterViewInit() {
+    this.refreshTimer = setInterval(() => this.refresh(), 30000);
+    window.addEventListener('focus', this.onFocus);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.refreshTimer);
+    window.removeEventListener('focus', this.onFocus);
+  }
+
   loadUserStats() {
     this.procedureService.getInboxCounts().subscribe({
-      next: (res) => {
-        this.userStats = res;
+      next: (res: any) => {
+        const n = (v: any) => Number(v) || 0;
+        const pending = n(res?.pending);
+        const received = n(res?.received);
+        this.userStats = {
+          pending,
+          received,
+          derived: n(res?.derived),
+          expired: n(res?.expired),
+          finished: n(res?.finished),
+          totalPending: res?.totalPending != null ? n(res.totalPending) : pending + received
+        };
         this.cdr.detectChanges();
       },
       error: (err) => {

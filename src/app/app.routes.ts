@@ -7,6 +7,14 @@ export const routes: Routes = [
     loadComponent: () => import('./components/login.js').then(m => m.LoginComponent)
   },
   {
+    path: 'seguimiento',
+    loadComponent: () => import('./components/public-tracking.js').then(m => m.PublicTrackingComponent)
+  },
+  {
+    path: 'consultar-tramite',
+    redirectTo: 'seguimiento'
+  },
+  {
     path: '',
     loadComponent: () => import('./components/main-layout.js').then(m => m.MainLayoutComponent),
     canActivate: [authGuard],

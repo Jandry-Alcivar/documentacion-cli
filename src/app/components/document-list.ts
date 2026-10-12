@@ -30,15 +30,33 @@ import { CatalogService } from '../services/catalog.service.js';
       
       <div class="page-header">
         <div>
-          <h1>Archivo Digital de Documentos</h1>
-          <p>Gestiona, aprueba, deriva y valida la integridad de la correspondencia oficial</p>
+          <h1>Archivo Digital de Documentos & Oficios</h1>
+          <p>Repositorio general de correspondencia oficial, memorandos, informes y resoluciones</p>
         </div>
-        <p-button 
-          label="Crear / Subir Documento" 
-          icon="pi pi-plus" 
-          styleClass="p-button-primary btn-create"
-          routerLink="create"
-        ></p-button>
+        <div class="header-actions">
+          <button 
+            class="btn-primary-action"
+            routerLink="/procedures/create"
+          >
+            <i class="pi pi-folder-plus mr-1"></i> Iniciar Trámite / Expediente
+          </button>
+          <button 
+            class="btn-secondary-action"
+            routerLink="create"
+          >
+            <i class="pi pi-file-plus mr-1"></i> Subir Documento Suelto
+          </button>
+        </div>
+      </div>
+
+      <!-- Banner Informativo Institucional -->
+      <div class="info-banner">
+        <div class="banner-icon">
+          <i class="pi pi-info-circle"></i>
+        </div>
+        <div class="banner-text">
+          <strong>Bandeja de Documentos Oficiales:</strong> Aquí visualizas cada documento individual, su estado de firma y el expediente al cual pertenece. Para gestionar flujos de trabajo, derivaciones y requisitos por pasos, ingresa a <a routerLink="/procedures" class="banner-link"><strong>Trámites & Expedientes</strong></a>.
+        </div>
       </div>
 
       <!-- Barra de Filtros -->
@@ -50,7 +68,7 @@ import { CatalogService } from '../services/catalog.service.js';
             pInputText 
             [(ngModel)]="searchQuery" 
             (input)="loadDocuments()"
-            placeholder="Buscar por título, descripción, etiquetas..." 
+            placeholder="Buscar por título, código de expediente, descripción..." 
           />
         </div>
 
@@ -73,9 +91,17 @@ import { CatalogService } from '../services/catalog.service.js';
           [class.active-tab]="activeTab === 'all'" 
           (click)="changeTab('all')"
         >
-          <i class="pi pi-file"></i> Mis Documentos
+          <i class="pi pi-file"></i> Todos los Documentos
         </button>
         
+        <button 
+          class="tab-btn" 
+          [class.active-tab]="activeTab === 'procedures'" 
+          (click)="changeTab('procedures')"
+        >
+          <i class="pi pi-folder"></i> De Expedientes / Trámites
+        </button>
+
         <button 
           class="tab-btn" 
           [class.active-tab]="activeTab === 'approved'" 
@@ -104,21 +130,37 @@ import { CatalogService } from '../services/catalog.service.js';
 
       <!-- Tabla de Documentos -->
       <div class="table-card">
-        <p-table [value]="documents" [rows]="10" [paginator]="true" styleClass="p-datatable-sm custom-table">
+        <p-table [value]="filteredDocuments" [rows]="10" [paginator]="true" styleClass="p-datatable-sm custom-table">
           <ng-template pTemplate="header">
             <tr>
-              <th>Título</th>
+              <th>Título del Documento</th>
+              <th>Expediente / Trámite</th>
               <th>Categoría</th>
               <th>Departamento</th>
               <th>Creador</th>
-              <th>Fecha Registro</th>
-              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Estado de Firma</th>
               <th style="width: 150px; text-align: center;">Acciones</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-doc>
             <tr>
-              <td class="font-semibold text-white">{{ doc.title }}</td>
+              <td>
+                <div class="doc-title-cell">
+                  <span class="font-semibold text-dark">{{ doc.title }}</span>
+                  <small *ngIf="doc.isConfidential" class="badge-confidential">
+                    <i class="pi pi-lock"></i> Confidencial
+                  </small>
+                </div>
+              </td>
+              <td>
+                <span *ngIf="doc.procedure" class="badge-procedure" (click)="goToProcedure(doc.procedure)" title="Ir al Expediente Digital">
+                  <i class="pi pi-folder-open"></i> {{ doc.procedure.code }}
+                </span>
+                <span *ngIf="!doc.procedure" class="badge-single-doc">
+                  <i class="pi pi-file"></i> Oficio Suelto
+                </span>
+              </td>
               <td>{{ doc.type?.name || doc.typeId }}</td>
               <td>{{ doc.department?.name }}</td>
               <td>{{ doc.creator?.name }}</td>
@@ -130,23 +172,33 @@ import { CatalogService } from '../services/catalog.service.js';
               </td>
               <td>
                 <div class="action-buttons">
-                  <!-- Detalle -->
+                  <!-- Detalle Documento -->
                   <button 
                     *ngIf="activeTab !== 'trash'"
-                    class="p-button p-button-rounded p-button-text p-button-info" 
-                    title="Ver Detalles"
+                    class="btn-action-icon" 
+                    title="Ver Detalles del Documento"
                     (click)="viewDetail(doc.id)"
                   >
-                    <i class="pi pi-eye" style="font-size: 1.15rem;"></i>
+                    <i class="pi pi-eye"></i>
                   </button>
                   
+                  <!-- Ver Expediente si pertenece a uno -->
+                  <button 
+                    *ngIf="doc.procedure && activeTab !== 'trash'"
+                    class="btn-action-icon text-indigo" 
+                    title="Abrir Expediente Digital"
+                    (click)="goToProcedure(doc.procedure)"
+                  >
+                    <i class="pi pi-folder"></i>
+                  </button>
+
                   <!-- Descarga de archivo -->
                   <a 
                     *ngIf="doc.fileUrl"
                     [href]="'http://localhost:3001' + doc.fileUrl" 
                     target="_blank" 
-                    class="btn-download-link"
-                    title="Descargar Archivo"
+                    class="btn-action-icon text-blue"
+                    title="Descargar Archivo PDF"
                   >
                     <i class="pi pi-download"></i>
                   </a>
@@ -154,20 +206,20 @@ import { CatalogService } from '../services/catalog.service.js';
                   <!-- Restaurar (Papelera) -->
                   <button 
                     *ngIf="activeTab === 'trash'"
-                    class="p-button p-button-rounded p-button-text p-button-success" 
+                    class="btn-action-icon text-green" 
                     title="Restaurar"
                     (click)="onRestore(doc.id)"
                   >
-                    <i class="pi pi-refresh" style="font-size: 1.15rem;"></i>
+                    <i class="pi pi-refresh"></i>
                   </button>
 
                   <!-- Enviar a Papelera / Eliminar -->
                   <button 
-                    class="p-button p-button-rounded p-button-text p-button-danger" 
+                    class="btn-action-icon text-red" 
                     title="Eliminar"
                     (click)="onDelete(doc.id)"
                   >
-                    <i class="pi pi-trash" style="font-size: 1.15rem;"></i>
+                    <i class="pi pi-trash"></i>
                   </button>
                 </div>
               </td>
@@ -175,7 +227,10 @@ import { CatalogService } from '../services/catalog.service.js';
           </ng-template>
           <ng-template pTemplate="emptystate">
             <tr>
-              <td colspan="7" style="text-align: center; padding: 3rem;">No se encontraron documentos en esta bandeja.</td>
+              <td colspan="8" class="empty-message">
+                <i class="pi pi-folder-open"></i>
+                <p>No se encontraron documentos en esta bandeja.</p>
+              </td>
             </tr>
           </ng-template>
         </p-table>
@@ -186,189 +241,274 @@ import { CatalogService } from '../services/catalog.service.js';
     .document-list-page {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1.25rem;
       font-family: 'Inter', system-ui, sans-serif;
     }
     .page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
     .page-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     .page-header p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      margin: 0.3rem 0 0;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
     }
-    :host ::ng-deep .btn-create {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-      border: none !important;
-      border-radius: 8px !important;
-      padding: 0.6rem 1.2rem !important;
-      font-weight: 600 !important;
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary-action {
+      background: #1d4ed8;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.15rem;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary-action:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
+    }
+    .btn-secondary-action {
+      background: #ffffff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 0.6rem 1.15rem;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .btn-secondary-action:hover {
+      background: #eff6ff;
+      border-color: #1d4ed8;
+    }
+
+    /* Banner Informativo */
+    .info-banner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 0.85rem 1.25rem;
+      color: #1e3a5f;
+      font-size: 0.88rem;
+    }
+    .banner-icon i {
+      font-size: 1.4rem;
+      color: #1d4ed8;
+    }
+    .banner-text {
+      flex: 1;
+      line-height: 1.45;
+    }
+    .banner-link {
+      color: #1d4ed8;
+      text-decoration: underline;
     }
 
     /* Filters Bar */
     .filters-bar {
       display: flex;
       gap: 1rem;
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
       border-radius: 10px;
-      padding: 1rem;
+      padding: 0.85rem 1.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      flex-wrap: wrap;
     }
     .search-input {
       position: relative;
       flex-grow: 1;
+      min-width: 260px;
     }
     .search-input i {
       position: absolute;
       left: 12px;
       top: 50%;
       transform: translateY(-50%);
-      color: #64748b;
+      color: #94a3b8;
     }
     .search-input input {
       width: 100%;
-      padding-left: 2.5rem;
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #f8fafc !important;
-      border-radius: 8px;
+      padding-left: 2.35rem;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      border-radius: 6px;
+      height: 38px;
     }
     :host ::ng-deep .filter-dropdown {
       width: 250px;
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      border-radius: 8px;
-    }
-    :host ::ng-deep .filter-dropdown .p-dropdown-label {
-      color: #f8fafc !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 6px;
+      height: 38px;
     }
 
     /* Tabs Layout */
     .tabs-container {
       display: flex;
-      gap: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.1rem;
+      gap: 0.35rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0;
+      overflow-x: auto;
     }
     .tab-btn {
       background: transparent;
       border: none;
-      color: #94a3b8;
-      padding: 0.8rem 1.2rem;
-      font-size: 0.9rem;
+      color: #64748b;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
       transition: all 0.2s;
+      white-space: nowrap;
     }
     .tab-btn:hover {
-      color: #f8fafc;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 6px 6px 0 0;
+      color: #0f172a;
+      background: #f8fafc;
     }
     .active-tab {
-      color: #818cf8;
-      border-bottom-color: #6366f1;
+      color: #1d4ed8;
+      border-bottom-color: #1d4ed8;
+      background: #ffffff;
+      font-weight: 700;
     }
     .btn-confidential-tab.active-tab {
-      color: #f43f5e;
-      border-bottom-color: #f43f5e;
+      color: #b91c1c;
+      border-bottom-color: #b91c1c;
     }
 
     /* Table Styles */
     .table-card {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
-    :host ::ng-deep .custom-table .p-datatable-thead > tr > th {
-      background: #1e293b !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      font-weight: 600 !important;
-      padding: 1rem !important;
+    .text-dark {
+      color: #0f172a !important;
+      font-weight: 600;
     }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #e2e8f0 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr:hover {
-      background: rgba(255, 255, 255, 0.02) !important;
-    }
-    :host ::ng-deep .custom-table .p-paginator {
-      background: #0f172a !important;
-      border: none !important;
-      border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-    }
-    :host ::ng-deep .custom-table .p-paginator .p-paginator-page, 
-    :host ::ng-deep .custom-table .p-paginator .p-paginator-next,
-    :host ::ng-deep .custom-table .p-paginator .p-paginator-last,
-    :host ::ng-deep .custom-table .p-paginator .p-paginator-first,
-    :host ::ng-deep .custom-table .p-paginator .p-paginator-prev {
-      color: #94a3b8 !important;
-    }
-    :host ::ng-deep .custom-table .p-paginator .p-highlight {
-      background: rgba(99, 102, 241, 0.15) !important;
-      color: #818cf8 !important;
-    }
+    .text-blue { color: #1d4ed8 !important; }
+    .text-green { color: #047857 !important; }
+    .text-red { color: #b91c1c !important; }
+    .text-indigo { color: #4338ca !important; }
 
-    /* Badges */
-    .status-badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
-      text-transform: uppercase;
-      display: inline-block;
+    .doc-title-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
     }
-    .badge-draft { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
-    .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-    .badge-approved { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-    .badge-rejected { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-    .badge-sent { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+    .badge-confidential {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      width: fit-content;
+    }
+    .badge-procedure {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s;
+    }
+    .badge-procedure:hover {
+      background: #dbeafe;
+      transform: translateY(-1px);
+    }
+    .badge-single-doc {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
 
     /* Actions */
     .action-buttons {
       display: flex;
-      gap: 0.25rem;
+      gap: 0.35rem;
       justify-content: center;
       align-items: center;
     }
-    .btn-download-link {
+    .btn-action-icon {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 2.35rem;
-      height: 2.35rem;
-      border-radius: 50%;
-      color: #38bdf8;
+      cursor: pointer;
       text-decoration: none;
-      transition: background 0.2s;
+      transition: all 0.15s;
     }
-    .btn-download-link:hover {
-      background: rgba(56, 189, 248, 0.1);
+    .btn-action-icon:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+      transform: translateY(-1px);
     }
-    .btn-download-link i {
-      font-size: 1rem;
+    .empty-message {
+      text-align: center;
+      padding: 3rem 1rem !important;
+      color: #94a3b8;
     }
-    .font-semibold {
-      font-weight: 600;
+    .empty-message i {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      display: block;
     }
-    .text-white {
-      color: #ffffff;
+    .empty-message p {
+      margin: 0;
+      font-size: 0.9rem;
     }
   `]
 })
@@ -391,6 +531,13 @@ export class DocumentListComponent implements OnInit {
   ngOnInit() {
     this.loadDocTypes();
     this.loadDocuments();
+  }
+
+  get filteredDocuments(): any[] {
+    if (this.activeTab === 'procedures') {
+      return this.documents.filter(d => !!d.procedure);
+    }
+    return this.documents;
   }
 
   isMayor(): boolean {
@@ -420,7 +567,6 @@ export class DocumentListComponent implements OnInit {
 
     if (this.activeTab === 'approved') {
       filters.status = 'APPROVED';
-      // Ver aprobados de su departamento
       filters.departmentId = this.authService.currentUser()?.department?.id;
     }
 
@@ -439,6 +585,14 @@ export class DocumentListComponent implements OnInit {
   changeTab(tab: string) {
     this.activeTab = tab;
     this.loadDocuments();
+  }
+
+  goToProcedure(proc: any) {
+    if (proc && proc.code) {
+      this.router.navigate(['/procedures'], { queryParams: { search: proc.code } });
+    } else {
+      this.router.navigate(['/procedures']);
+    }
   }
 
   viewDetail(id: string) {
@@ -466,7 +620,6 @@ export class DocumentListComponent implements OnInit {
   }
 
   onDelete(id: string) {
-    // Si ya estamos en papelera, delete físico o suave
     this.documentService.deleteDocument(id).subscribe({
       next: () => {
         this.messageService.add({

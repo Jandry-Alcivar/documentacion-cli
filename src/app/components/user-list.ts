@@ -35,12 +35,12 @@ import { RoleService } from '../services/role.service.js';
           <h1>Control de Usuarios Institucionales</h1>
           <p>Crea, modifica e inactiva credenciales y asignaciones departamentales del personal</p>
         </div>
-        <p-button 
-          label="Nuevo Usuario" 
-          icon="pi pi-user-plus" 
-          styleClass="p-button-primary btn-create"
+        <button 
+          class="btn-create-user"
           (click)="openNew()"
-        ></p-button>
+        >
+          <i class="pi pi-user-plus mr-1"></i> Nuevo Usuario
+        </button>
       </div>
 
       <!-- Tabla de Usuarios -->
@@ -58,7 +58,7 @@ import { RoleService } from '../services/role.service.js';
           </ng-template>
           <ng-template pTemplate="body" let-u>
             <tr>
-              <td class="font-semibold text-white">{{ u.name }}</td>
+              <td class="font-semibold text-dark">{{ u.name }}</td>
               <td>{{ u.email }}</td>
               <td>{{ u.department?.name }}</td>
               <td>{{ u.role?.name }}</td>
@@ -69,26 +69,28 @@ import { RoleService } from '../services/role.service.js';
               </td>
               <td>
                 <div class="action-buttons">
-                  <p-button 
-                    icon="pi pi-user-edit" 
-                    styleClass="p-button-rounded p-button-text p-button-info" 
+                  <button 
+                    class="btn-action-icon text-blue" 
                     title="Editar"
                     (click)="openEdit(u)"
-                  ></p-button>
-                  <p-button 
-                    icon="pi pi-user-minus" 
-                    styleClass="p-button-rounded p-button-text p-button-danger" 
+                  >
+                    <i class="pi pi-user-edit"></i>
+                  </button>
+                  <button 
+                    class="btn-action-icon text-red" 
                     title="Desactivar"
                     [disabled]="!u.isActive"
                     (click)="onDelete(u.id)"
-                  ></p-button>
+                  >
+                    <i class="pi pi-user-minus"></i>
+                  </button>
                 </div>
               </td>
             </tr>
           </ng-template>
           <ng-template pTemplate="emptystate">
             <tr>
-              <td colspan="6" style="text-align: center; padding: 3rem;">No hay usuarios registrados en el sistema.</td>
+              <td colspan="6" style="text-align: center; padding: 3rem; color: #94a3b8;">No hay usuarios registrados en el sistema.</td>
             </tr>
           </ng-template>
         </p-table>
@@ -188,65 +190,93 @@ import { RoleService } from '../services/role.service.js';
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
     .page-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     .page-header p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      margin: 0.3rem 0 0;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
     }
-    :host ::ng-deep .btn-create {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-      border: none !important;
-      border-radius: 8px !important;
-      padding: 0.6rem 1.2rem !important;
-      font-weight: 600 !important;
+    .btn-create-user {
+      background: #1d4ed8;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-create-user:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
     }
 
     /* Table */
     .table-card {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
-    :host ::ng-deep .custom-table .p-datatable-thead > tr > th {
-      background: #1e293b !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      font-weight: 600 !important;
-      padding: 1rem !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #e2e8f0 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr:hover {
-      background: rgba(255, 255, 255, 0.02) !important;
+    .text-dark {
+      color: #0f172a !important;
     }
 
     /* Badges */
     .status-badge {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 0.2rem 0.5rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
-    .badge-active { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-    .badge-inactive { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .badge-active { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .badge-inactive { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
     /* Actions */
     .action-buttons {
       display: flex;
-      gap: 0.25rem;
+      gap: 0.35rem;
       justify-content: center;
     }
+    .btn-action-icon {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-action-icon:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      transform: translateY(-1px);
+    }
+    .btn-action-icon:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .text-blue { color: #1d4ed8 !important; }
+    .text-red { color: #b91c1c !important; }
 
     /* Form */
     .user-form {
@@ -254,7 +284,7 @@ import { RoleService } from '../services/role.service.js';
       flex-direction: column;
       gap: 1rem;
       padding: 0.5rem 0;
-      color: #cbd5e1;
+      color: #0f172a;
     }
     .form-field {
       display: flex;
@@ -264,22 +294,22 @@ import { RoleService } from '../services/role.service.js';
     .form-field label {
       font-size: 0.85rem;
       font-weight: 600;
+      color: #334155;
     }
     :host ::ng-deep .user-form input[type="text"],
     :host ::ng-deep .user-form input[type="email"],
     :host ::ng-deep .user-form input[type="password"] {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #f8fafc !important;
-      border-radius: 8px !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      border-radius: 6px !important;
+      height: 38px;
     }
-    :host ::ng-deep .user-form .p-dropdown {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      border-radius: 8px !important;
-    }
-    :host ::ng-deep .user-form .p-dropdown .p-dropdown-label {
-      color: #f8fafc !important;
+    :host ::ng-deep .user-form .p-select {
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 6px !important;
+      height: 38px;
     }
     .flex-row {
       display: flex;
@@ -291,7 +321,6 @@ import { RoleService } from '../services/role.service.js';
     .mr-2 { margin-right: 0.5rem; }
     .text-center { text-align: center; }
     .font-semibold { font-weight: 600; }
-    .text-white { color: #ffffff; }
   `]
 })
 export class UserListComponent implements OnInit {

@@ -55,7 +55,7 @@ import { ProcedureService } from '../services/procedure.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-proc>
               <tr>
-                <td class="font-semibold text-white">{{ proc.code }}</td>
+                <td class="font-semibold text-dark">{{ proc.code }}</td>
                 <td>{{ proc.subject }}</td>
                 <td>{{ proc.applicantName }}</td>
                 <td>{{ proc.updatedAt | date:'short' }}</td>
@@ -68,7 +68,7 @@ import { ProcedureService } from '../services/procedure.service.js';
             </ng-template>
             <ng-template pTemplate="emptystate">
               <tr>
-                <td colspan="5" class="text-center" style="padding: 3rem;">No hay trámites finalizados pendientes de archivado físico.</td>
+                <td colspan="5" class="text-center" style="padding: 3rem; color: #94a3b8;">No hay trámites finalizados pendientes de archivado físico.</td>
               </tr>
             </ng-template>
           </p-table>
@@ -92,7 +92,7 @@ import { ProcedureService } from '../services/procedure.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-proc>
               <tr>
-                <td class="font-semibold text-white">{{ proc.code }}</td>
+                <td class="font-semibold text-dark">{{ proc.code }}</td>
                 <td>{{ proc.subject }}</td>
                 <td>{{ proc.warehouse?.name }}</td>
                 <td>{{ proc.sector?.name }}</td>
@@ -107,7 +107,7 @@ import { ProcedureService } from '../services/procedure.service.js';
             </ng-template>
             <ng-template pTemplate="emptystate">
               <tr>
-                <td colspan="7" class="text-center" style="padding: 3rem;">No se han encontrado expedientes archivados físicamente.</td>
+                <td colspan="7" class="text-center" style="padding: 3rem; color: #94a3b8;">No se han encontrado expedientes archivados físicamente.</td>
               </tr>
             </ng-template>
           </p-table>
@@ -159,103 +159,92 @@ import { ProcedureService } from '../services/procedure.service.js';
       font-family: 'Inter', system-ui, sans-serif;
     }
     .page-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
-      color: #ffffff;
+      color: #0f172a;
       margin: 0;
     }
     .page-header p {
-      color: #94a3b8;
-      font-size: 0.95rem;
-      margin: 0.3rem 0 0;
+      color: #64748b;
+      font-size: 0.9rem;
+      margin: 0.25rem 0 0;
     }
 
     /* Tabs Layout */
     .tabs-container {
       display: flex;
-      gap: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.1rem;
+      gap: 0.35rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0;
     }
     .tab-btn {
       background: transparent;
       border: none;
-      color: #94a3b8;
-      padding: 0.8rem 1.2rem;
-      font-size: 0.9rem;
+      color: #64748b;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
       transition: all 0.2s;
     }
     .tab-btn:hover {
-      color: #f8fafc;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 6px 6px 0 0;
+      color: #0f172a;
+      background: #f8fafc;
     }
     .active-tab {
-      color: #818cf8;
-      border-bottom-color: #6366f1;
+      color: #1d4ed8;
+      border-bottom-color: #1d4ed8;
+      background: #ffffff;
+      font-weight: 700;
     }
 
     .tab-pane-content {
-      animation: fadeIn 0.3s ease-out;
+      animation: fadeIn 0.25s ease-out;
     }
 
     /* Table Styles */
     .table-card {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
-    :host ::ng-deep .custom-table .p-datatable-thead > tr > th {
-      background: #1e293b !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      font-weight: 600 !important;
-      padding: 1rem !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #e2e8f0 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
+    .text-dark { color: #0f172a !important; }
     .font-semibold { font-weight: 600; }
     .font-mono { font-family: 'Courier New', Courier, monospace; }
-    .text-white { color: #ffffff; }
-    .text-indigo { color: #818cf8; }
+    .text-indigo { color: #1d4ed8; }
     .text-center { text-align: center; }
 
     .btn-action {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 0.75rem;
+      gap: 0.35rem;
+      padding: 0.4rem 0.8rem;
       border: none;
       border-radius: 6px;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: all 0.15s;
       white-space: nowrap;
     }
-    .btn-action:hover { opacity: 0.85; transform: translateY(-1px); }
-    .btn-action:active { transform: translateY(0); }
-    .btn-success { background: #22c55e; color: #fff; }
-    .btn-danger  { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-    .btn-cancel  { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
-
+    .btn-action:hover { transform: translateY(-1px); }
+    .btn-success { background: #047857; color: #fff; }
+    .btn-danger  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .btn-cancel  { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
     /* Dialog styling */
     .dialog-form {
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      color: #cbd5e1;
+      color: #0f172a;
     }
     .form-field {
       display: flex;
@@ -265,6 +254,7 @@ import { ProcedureService } from '../services/procedure.service.js';
     .form-field label {
       font-size: 0.85rem;
       font-weight: 600;
+      color: #334155;
     }
   `]
 })
@@ -382,6 +372,13 @@ export class PhysicalArchiveComponent implements OnInit {
         this.messageService.add({ severity: 'warn', summary: 'Trámite Reabierto', detail: 'El trámite ha sido retornado a bandeja de entrada.' });
         this.loadPendingProcedures();
         this.loadArchivedProcedures();
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'No se pudo revertir',
+          detail: err.error?.error || 'No se pudo reabrir el trámite (posible bloqueo total de inmutabilidad).'
+        });
       }
     });
   }

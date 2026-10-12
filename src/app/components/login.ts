@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Card } from 'primeng/card';
@@ -15,11 +15,11 @@ import { AuthService } from '../services/auth.service.js';
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     FormsModule,
     Card,
     InputText,
     Password,
-    Button,
     Toast
   ],
   providers: [MessageService],
@@ -30,16 +30,16 @@ import { AuthService } from '../services/auth.service.js';
         <p-card styleClass="p-shadow-6 login-card">
           <ng-template pTemplate="header">
             <div class="login-header">
-              <span class="logo-icon"><i class="pi pi-briefcase"></i></span>
+              <span class="logo-icon"><i class="pi pi-building"></i></span>
               <h2>G-DOC</h2>
-              <p>Sistema de Gestión Documental Inteligente</p>
-              <div class="sub-district">GAD Junín</div>
+              <p>Sistema de Gestión Documental y Expedientes Digitales</p>
+              <div class="sub-district">Gobierno Autónomo Descentralizado Junín</div>
             </div>
           </ng-template>
           
           <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form">
             <div class="form-group">
-              <label for="email">Correo Electrónico</label>
+              <label for="email">Correo Institucional</label>
               <div class="input-icon-wrapper">
                 <i class="pi pi-envelope"></i>
                 <input 
@@ -49,14 +49,14 @@ import { AuthService } from '../services/auth.service.js';
                   pInputText 
                   [(ngModel)]="email" 
                   required 
-                  placeholder="ejemplo@gob.gob" 
+                  placeholder="ejemplo@junin.gob.ec" 
                   class="w-full"
                 />
               </div>
             </div>
             
             <div class="form-group">
-              <label for="password">Contraseña</label>
+              <label for="password">Contraseña de Acceso</label>
               <div class="input-icon-wrapper">
                 <i class="pi pi-lock"></i>
                 <p-password 
@@ -74,15 +74,26 @@ import { AuthService } from '../services/auth.service.js';
             </div>
             
             <div class="form-action">
-              <p-button 
+              <button 
                 type="submit" 
-                label="Iniciar Sesión" 
-                icon="pi pi-sign-in" 
-                styleClass="w-full btn-submit"
-                [loading]="loading"
-              ></p-button>
+                class="btn-submit-login"
+                [disabled]="loading"
+              >
+                <i class="pi pi-sign-in mr-2" *ngIf="!loading"></i>
+                <i class="pi pi-spin pi-spinner mr-2" *ngIf="loading"></i>
+                <span>{{ loading ? 'Autenticando...' : 'Acceder al Sistema' }}</span>
+              </button>
             </div>
           </form>
+
+          <div class="citizen-track-section">
+            <div class="divider">
+              <span>Consulta Pública</span>
+            </div>
+            <a routerLink="/seguimiento" class="btn-citizen-track">
+              <i class="pi pi-search mr-2"></i> Consultar Estado de Trámite Ciudadano
+            </a>
+          </div>
         </p-card>
       </div>
     </div>
@@ -93,79 +104,79 @@ import { AuthService } from '../services/auth.service.js';
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #0f172a 100%);
+      background: linear-gradient(135deg, #0a1626 0%, #0f2137 50%, #1e3a5f 100%);
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       padding: 1.5rem;
     }
     .login-card-wrapper {
       width: 100%;
-      max-width: 450px;
-      animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      max-width: 440px;
+      animation: fadeInUp 0.4s ease-out;
     }
     :host ::ng-deep .login-card {
-      background: rgba(255, 255, 255, 0.03) !important;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      border-radius: 16px !important;
-      color: #f8fafc !important;
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.25) !important;
+      color: #0f172a !important;
       overflow: hidden;
     }
     .login-header {
       text-align: center;
-      padding: 2.5rem 1.5rem 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 2.2rem 1.5rem 1.2rem;
+      border-bottom: 1px solid #f1f5f9;
+      background: #f8fafc;
     }
     .logo-icon {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      width: 52px;
+      height: 52px;
+      background: #1d4ed8;
       color: #ffffff;
-      border-radius: 14px;
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+      border-radius: 10px;
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);
     }
     .login-header h2 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 800;
       margin: 0;
-      letter-spacing: 0.05em;
-      background: linear-gradient(to right, #ffffff, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #0f172a;
+      letter-spacing: 0.02em;
     }
     .login-header p {
-      font-size: 0.9rem;
-      color: #94a3b8;
-      margin: 0.4rem 0 0.6rem;
+      font-size: 0.85rem;
+      color: #64748b;
+      margin: 0.35rem 0 0.5rem;
+      font-weight: 500;
     }
     .sub-district {
       display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 0.2rem 0.6rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #1d4ed8;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 0.2rem 0.65rem;
       border-radius: 100px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.03em;
     }
     .login-form {
-      padding: 1.5rem 2rem 2.5rem;
+      padding: 1.5rem 2rem 1rem;
     }
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
     .form-group label {
       display: block;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #cbd5e1;
-      margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 0.4rem;
     }
     .input-icon-wrapper {
       position: relative;
@@ -175,22 +186,25 @@ import { AuthService } from '../services/auth.service.js';
       left: 12px;
       top: 50%;
       transform: translateY(-50%);
-      color: #64748b;
-      font-size: 1rem;
+      color: #94a3b8;
+      font-size: 0.95rem;
       z-index: 1;
     }
     :host ::ng-deep .input-icon-wrapper input {
       width: 100% !important;
-      padding-left: 2.5rem !important;
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #f8fafc !important;
-      border-radius: 8px !important;
+      padding-left: 2.35rem !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      border-radius: 6px !important;
+      height: 40px !important;
+      font-size: 0.88rem !important;
       transition: all 0.2s;
     }
     :host ::ng-deep .input-icon-wrapper input:focus {
-      border-color: #818cf8 !important;
-      box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2) !important;
+      border-color: #1d4ed8 !important;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12) !important;
+      background: #ffffff !important;
     }
     :host ::ng-deep .p-password-input {
       width: 100% !important;
@@ -199,24 +213,75 @@ import { AuthService } from '../services/auth.service.js';
       width: 100%;
     }
     .form-action {
-      margin-top: 2rem;
+      margin-top: 1.5rem;
     }
-    :host ::ng-deep .btn-submit {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-      border: none !important;
-      border-radius: 8px !important;
-      padding: 0.8rem !important;
-      font-weight: 600 !important;
-      transition: transform 0.2s, box-shadow 0.2s !important;
+    .btn-submit-login {
+      width: 100%;
+      background: #1d4ed8;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.15s;
     }
-    :host ::ng-deep .btn-submit:hover {
+    .btn-submit-login:hover:not(:disabled) {
+      background: #1e40af;
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+    }
+    .btn-submit-login:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .citizen-track-section {
+      padding: 0 2rem 1.8rem;
+      text-align: center;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      color: #94a3b8;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .divider span {
+      padding: 0 0.6rem;
+    }
+    .btn-citizen-track {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #1d4ed8;
+      text-decoration: none;
+      padding: 0.65rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      transition: all 0.2s;
+    }
+    .btn-citizen-track:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
     }
     @keyframes fadeInUp {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(12px);
       }
       to {
         opacity: 1;

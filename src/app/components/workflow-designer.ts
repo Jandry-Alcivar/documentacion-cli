@@ -6,8 +6,7 @@ import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Toast } from 'primeng/toast';
 import { Dialog } from 'primeng/dialog';
-import { MessageService, TreeNode, SharedModule, PrimeTemplate } from 'primeng/api';
-import { OrganizationChart } from 'primeng/organizationchart';
+import { MessageService, TreeNode } from 'primeng/api';
 import { DepartmentService } from '../services/department.service.js';
 import { CatalogService } from '../services/catalog.service.js';
 
@@ -20,10 +19,7 @@ import { CatalogService } from '../services/catalog.service.js';
     InputText,
     Select,
     Toast,
-    Dialog,
-    OrganizationChart,
-    SharedModule,
-    PrimeTemplate
+    Dialog
   ],
   providers: [MessageService],
   template: `
@@ -89,58 +85,49 @@ import { CatalogService } from '../services/catalog.service.js';
           </div>
         </div>
 
-        <div class="chart-container">
-          <p-organizationchart [value]="chartData" styleClass="custom-org-chart">
-            <!-- Soporte para pTemplate="node" (PrimeNG 18+) -->
-            <ng-template let-node pTemplate="node">
-              <div class="node-box" [class.node-start]="node.data?.isStart" [class.node-end]="node.data?.isEnd">
-                <div class="node-badge" *ngIf="node.data?.isStart"><i class="pi pi-play-circle"></i> INICIO</div>
-                <div class="node-badge" *ngIf="node.data?.isEnd"><i class="pi pi-stop-circle"></i> FIN</div>
-                
-                <h4 class="node-name">{{ node.label }}</h4>
-                <div class="node-dept"><i class="pi pi-map-marker"></i> {{ node.data?.department?.name || 'Cargando...' }}</div>
-                
-                <div class="node-details">
-                  <span><i class="pi pi-clock"></i> Máx: {{ node.data?.maxHours || 0 }} hrs</span>
-                  <span><i class="pi pi-file"></i> Req: {{ node.data?.requiredDocTypes?.length || 0 }}</span>
-                </div>
+        <div class="canvas-toolbar">
+          <span><i class="pi pi-arrows-alt"></i> Arrastre los nodos con el mouse para reorganizar el diagrama</span>
+          <button class="p-button p-button-sm p-button-text" (click)="resetLayout()"><i class="pi pi-refresh mr-1"></i> Reordenar automáticamente</button>
+        </div>
+        <div class="flow-canvas" #canvas
+             [style.height.px]="canvasHeight">
+          <svg class="flow-links" [attr.width]="canvasWidth" [attr.height]="canvasHeight">
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#6366f1"></path>
+              </marker>
+            </defs>
+            <path *ngFor="let l of links" [attr.d]="l" class="flow-link" marker-end="url(#arrow)"></path>
+          </svg>
 
-                <div class="node-actions mt-2">
-                  <button class="p-button p-button-text p-button-sm p-button-info mr-1" (click)="openEditNodeDialog(node.data)" title="Editar Paso del Flujo">
-                    <i class="pi pi-pencil"></i>
-                  </button>
-                  <button class="p-button p-button-text p-button-sm p-button-danger" (click)="deleteNode(node.data?.id)" title="Eliminar Paso de la Ruta">
-                    <i class="pi pi-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </ng-template>
+          <div *ngIf="orderedNodes.length === 0" class="empty-canvas">
+            <i class="pi pi-sitemap"></i>
+            <p>Este flujo aún no tiene nodos. Use “Agregar Nodo al Flujo”.</p>
+          </div>
 
-            <!-- Soporte para pTemplate="default" (PrimeNG anterior o fallbacks) -->
-            <ng-template let-node pTemplate="default">
-              <div class="node-box" [class.node-start]="node.data?.isStart" [class.node-end]="node.data?.isEnd">
-                <div class="node-badge" *ngIf="node.data?.isStart"><i class="pi pi-play-circle"></i> INICIO</div>
-                <div class="node-badge" *ngIf="node.data?.isEnd"><i class="pi pi-stop-circle"></i> FIN</div>
-                
-                <h4 class="node-name">{{ node.label }}</h4>
-                <div class="node-dept"><i class="pi pi-map-marker"></i> {{ node.data?.department?.name || 'Cargando...' }}</div>
-                
-                <div class="node-details">
-                  <span><i class="pi pi-clock"></i> Máx: {{ node.data?.maxHours || 0 }} hrs</span>
-                  <span><i class="pi pi-file"></i> Req: {{ node.data?.requiredDocTypes?.length || 0 }}</span>
-                </div>
-
-                <div class="node-actions mt-2">
-                  <button class="p-button p-button-text p-button-sm p-button-info mr-1" (click)="openEditNodeDialog(node.data)" title="Editar Paso del Flujo">
-                    <i class="pi pi-pencil"></i>
-                  </button>
-                  <button class="p-button p-button-text p-button-sm p-button-danger" (click)="deleteNode(node.data?.id)" title="Eliminar Paso de la Ruta">
-                    <i class="pi pi-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </ng-template>
-          </p-organizationchart>
+          <div *ngFor="let node of orderedNodes; let i = index"
+               class="node-box"
+               [class.node-start]="node.isStart" [class.node-end]="node.isEnd"
+               [class.dragging]="dragId === node.id"
+               [style.left.px]="pos[node.id]?.x" [style.top.px]="pos[node.id]?.y"
+               (mousedown)="startDrag($event, node)">
+            <div class="node-head">
+              <span class="node-step">{{ i + 1 }}</span>
+              <span class="node-badge start" *ngIf="node.isStart"><i class="pi pi-play"></i> INICIO</span>
+              <span class="node-badge end" *ngIf="node.isEnd"><i class="pi pi-flag"></i> FIN</span>
+            </div>
+            <h4 class="node-name">{{ node.name }}</h4>
+            <div class="node-dept"><i class="pi pi-building"></i> {{ node.department?.name || 'Sin departamento' }}</div>
+            <div class="node-details">
+              <span><i class="pi pi-clock"></i> {{ node.maxHours || 0 }} hrs</span>
+              <span><i class="pi pi-file"></i> Req: {{ node.requiredDocTypes?.length || 0 }}</span>
+              <span><i class="pi pi-send"></i> {{ node.typeEnvio || 'PARA' }}</span>
+            </div>
+            <div class="node-actions">
+              <button class="icon-btn edit" (mousedown)="$event.stopPropagation()" (click)="openEditNodeDialog(node)" title="Editar"><i class="pi pi-pencil"></i></button>
+              <button class="icon-btn del" (mousedown)="$event.stopPropagation()" (click)="deleteNode(node.id)" title="Eliminar"><i class="pi pi-trash"></i></button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -217,6 +204,22 @@ import { CatalogService } from '../services/catalog.service.js';
             <label>Tipo de Envío *</label>
             <p-select [options]="envioTypes" [(ngModel)]="nodeForm.typeEnvio" placeholder="Envío" styleClass="w-full" appendTo="body"></p-select>
           </div>
+          <div class="form-field mb-2">
+            <label>Tipo de Documento Oficial Requerido para este Paso</label>
+            <p-select 
+              [options]="allDocTypes" 
+              [(ngModel)]="selectedRequiredDocType" 
+              optionLabel="name" 
+              optionValue="id" 
+              placeholder="Seleccionar tipo de documento requerido" 
+              styleClass="w-full" 
+              appendTo="body"
+              (onChange)="onRequiredDocTypeChange()"
+            ></p-select>
+            <small class="text-muted block mt-1" *ngIf="nodeForm.requiredDocTypes && nodeForm.requiredDocTypes.length > 0">
+              Documento obligatorio asignado al paso.
+            </small>
+          </div>
           <div class="flex-field-row mb-2">
             <div class="flex-align">
               <input type="checkbox" id="chk-start" [(ngModel)]="nodeForm.isStart" />
@@ -241,180 +244,91 @@ import { CatalogService } from '../services/catalog.service.js';
     </div>
   `,
   styles: [`
-    .workflow-designer-page {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      font-family: 'Inter', system-ui, sans-serif;
-    }
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .page-header h1 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #ffffff;
-      margin: 0;
-    }
-    .page-header p {
-      color: #94a3b8;
-      font-size: 0.95rem;
-      margin: 0.3rem 0 0;
-    }
+    .workflow-designer-page { display: flex; flex-direction: column; gap: 1.25rem; font-family: 'Inter', system-ui, sans-serif; color: #0f172a; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-radius: 14px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 60%, #7c3aed 100%); box-shadow: 0 10px 25px -10px rgba(79,70,229,.55); }
+    .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #fff; margin: 0; }
+    .page-header p { color: #e0e7ff; font-size: .92rem; margin: .3rem 0 0; }
 
-    .flow-selector-card {
-      background: rgba(30, 41, 59, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 1.25rem;
-      border-radius: 12px;
-    }
+    .flow-selector-card { background: #fff; border: 1px solid #e2e8f0; padding: 1.25rem; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .flow-selector-card label { color: #1e293b; }
 
-    /* Canvas */
-    .canvas-wrapper {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      padding: 1.5rem;
-    }
-    .canvas-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.8rem;
-      margin-bottom: 1.5rem;
-    }
-    .canvas-title-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    .canvas-header h3 {
-      margin: 0;
-      color: #ffffff;
-    }
-    .save-status-badge {
-      font-size: 0.75rem;
-      color: #10b981;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-weight: 600;
-    }
-    .dialog-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-    }
+    .canvas-wrapper { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(15,23,42,.06); }
+    .canvas-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+      border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1rem; }
+    .canvas-title-group { display: flex; flex-direction: column; gap: .25rem; }
+    .canvas-header h3 { margin: 0; color: #0f172a; font-weight: 800; }
+    .canvas-title-group > div { color: #475569 !important; }
+    .canvas-title-group strong { color: #1e293b !important; }
+    .canvas-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .save-status-badge { font-size: .75rem; color: #047857; display: flex; align-items: center; gap: .25rem; font-weight: 700; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: .5rem; }
 
-    /* Org Chart Node Styling */
-    .chart-container {
-      display: flex;
-      justify-content: center;
-      overflow-x: auto;
-      padding: 2rem 0;
-    }
-    .node-box {
-      background: #1e293b;
-      border: 2px solid #334155;
-      padding: 1rem;
-      border-radius: 10px;
-      color: #ffffff;
-      min-width: 180px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-      position: relative;
-    }
-    .node-start {
-      border-color: #6366f1;
-      background: rgba(99, 102, 241, 0.15);
-    }
-    .node-end {
-      border-color: #22c55e;
-      background: rgba(34, 197, 94, 0.15);
-    }
-    .node-badge {
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 0.1rem 0.3rem;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      width: fit-content;
-      margin-bottom: 0.4rem;
-    }
-    .node-start .node-badge { background: #6366f1; }
-    .node-end .node-badge { background: #22c55e; }
-    .node-name {
-      margin: 0 0 0.25rem 0;
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-    .node-dept {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      margin-bottom: 0.5rem;
-    }
-    .node-details {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.7rem;
-      color: #64748b;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 0.4rem;
-    }
-    .node-actions {
-      display: flex;
-      justify-content: center;
-      gap: 0.25rem;
-    }
+    .canvas-toolbar { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; color: #475569; margin-bottom: .6rem; }
+    .canvas-toolbar i { color: #4f46e5; }
 
-    /* Custom Org Chart connections override for premium look */
-    ::ng-deep .custom-org-chart .p-organizationchart-line-down {
-      background-color: #475569 !important;
-    }
-    ::ng-deep .custom-org-chart .p-organizationchart-line-left,
-    ::ng-deep .custom-org-chart .p-organizationchart-line-right {
-      border-color: #475569 !important;
-    }
-    ::ng-deep .custom-org-chart .p-organizationchart-line-top {
-      border-color: #475569 !important;
-    }
+    .flow-canvas { position: relative; overflow: auto; min-height: 420px; border-radius: 12px; border: 1px dashed #c7d2fe;
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; user-select: none; }
+    .flow-links { position: absolute; top: 0; left: 0; pointer-events: none; }
+    .flow-link { fill: none; stroke: #6366f1; stroke-width: 2.5; stroke-dasharray: 6 4; animation: dash 1s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -20; } }
+    .empty-canvas { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; }
+    .empty-canvas i { font-size: 2.5rem; color: #a5b4fc; }
 
-    /* Dialog field adjustments */
-    .dialog-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      color: #cbd5e1;
-    }
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-    .form-field label {
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-    .flex-align {
-      display: flex;
-      align-items: center;
-    }
-    .ml-2 { margin-left: 0.5rem; }
-    .mr-2 { margin-right: 0.5rem; }
-    .mt-2 { margin-top: 0.5rem; }
+    .node-box { position: absolute; width: 230px; background: #fff; border: 2px solid #cbd5e1; border-left: 6px solid #3b82f6;
+      border-radius: 12px; padding: .8rem .9rem; color: #0f172a; cursor: grab;
+      box-shadow: 0 6px 16px -6px rgba(15,23,42,.18); transition: box-shadow .2s; will-change: left, top; }
+    .node-box:hover { box-shadow: 0 12px 24px -8px rgba(79,70,229,.35); }
+    .node-box.dragging { cursor: grabbing; outline: 3px solid #a5b4fc; box-shadow: 0 18px 30px -10px rgba(79,70,229,.5); z-index: 10; transition: none; }
+    .node-start { border-left-color: #4f46e5; background: linear-gradient(180deg, #eef2ff, #fff); }
+    .node-end { border-left-color: #059669; background: linear-gradient(180deg, #ecfdf5, #fff); }
+    .node-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .35rem; }
+    .node-step { width: 22px; height: 22px; border-radius: 50%; background: #1e293b; color: #fff; font-size: .72rem; font-weight: 800;
+      display: inline-flex; align-items: center; justify-content: center; }
+    .node-badge { font-size: .65rem; font-weight: 800; padding: .15rem .45rem; border-radius: 999px; color: #fff; display: inline-flex; gap: .25rem; align-items: center; }
+    .node-badge.start { background: #4f46e5; }
+    .node-badge.end { background: #059669; }
+    .node-name { margin: 0 0 .25rem; font-size: 1rem; font-weight: 800; color: #0f172a; }
+    .node-dept { font-size: .8rem; color: #334155; font-weight: 600; margin-bottom: .5rem; display: flex; gap: .3rem; align-items: center; }
+    .node-dept i { color: #4f46e5; }
+    .node-details { display: flex; justify-content: space-between; font-size: .72rem; color: #475569; font-weight: 600;
+      border-top: 1px solid #e2e8f0; padding-top: .45rem; }
+    .node-actions { display: flex; justify-content: flex-end; gap: .35rem; margin-top: .55rem; }
+    .icon-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .icon-btn.edit { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .icon-btn.del { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+    .icon-btn:hover { filter: brightness(.95); }
+
+    .dialog-form { display: flex; flex-direction: column; gap: 1rem; color: #1e293b; }
+    .form-field { display: flex; flex-direction: column; gap: .4rem; }
+    .form-field label { font-size: .85rem; font-weight: 600; }
+    .flex-align { display: flex; align-items: center; }
+    .ml-2 { margin-left: .5rem; }
+    .mr-2 { margin-right: .5rem; }
+    .mt-2 { margin-top: .5rem; }
   `]
 })
 export class WorkflowDesignerComponent implements OnInit {
   workflows: any[] = [];
   procedureTypes: any[] = [];
   departments: any[] = [];
+  allDocTypes: any[] = [];
+  selectedRequiredDocType: string | null = null;
   envioTypes: string[] = ['PARA', 'COPIA'];
 
   selectedFlowId: string | null = null;
   selectedFlow: any = null;
   chartData: TreeNode[] = [];
+  orderedNodes: any[] = [];
+  pos: Record<string, { x: number; y: number }> = {};
+  links: string[] = [];
+  canvasWidth = 900;
+  canvasHeight = 420;
+  dragId: string | null = null;
+  private dragOffset = { x: 0, y: 0 };
+  private readonly NODE_W = 230;
+  private readonly NODE_H = 150;
 
   // Dialog states
   showCreateFlowDialog = false;
@@ -459,6 +373,16 @@ export class WorkflowDesignerComponent implements OnInit {
     this.loadWorkflows();
     this.loadProcedureTypes();
     this.loadDepartments();
+    this.loadDocTypes();
+  }
+
+  loadDocTypes() {
+    this.catalogService.getDocumentTypes().subscribe({
+      next: (res) => {
+        this.allDocTypes = res.filter(d => d.isActive);
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   loadWorkflows() {
@@ -507,11 +431,21 @@ export class WorkflowDesignerComponent implements OnInit {
   buildChartData() {
     if (!this.selectedFlow || !this.selectedFlow.nodes || this.selectedFlow.nodes.length === 0) {
       this.chartData = [];
+      this.orderedNodes = [];
+      this.links = [];
       return;
     }
 
-    // Sort nodes linear order
-    const sorted = [...this.selectedFlow.nodes].sort((a: any, b: any) => a.isStart ? -1 : b.isStart ? 1 : 0);
+    // Orden lineal: inicio primero, fin al final, resto por orden/creación
+    const sorted = [...this.selectedFlow.nodes].sort((a: any, b: any) => {
+      if (a.isStart !== b.isStart) return a.isStart ? -1 : 1;
+      if (a.isEnd !== b.isEnd) return a.isEnd ? 1 : -1;
+      const oa = a.order ?? a.stepOrder ?? 0, ob = b.order ?? b.stepOrder ?? 0;
+      if (oa !== ob) return oa - ob;
+      return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+    });
+    this.orderedNodes = sorted;
+    this.loadPositions();
 
     const rootNode: TreeNode = {
       label: sorted[0].name,
@@ -533,6 +467,106 @@ export class WorkflowDesignerComponent implements OnInit {
     }
 
     this.chartData = [rootNode];
+  }
+
+  private storageKey() { return `wf-layout-${this.selectedFlow?.id}`; }
+
+  private defaultPos(i: number) {
+    // Zig-zag en filas de 3 columnas
+    const cols = 3, gapX = 90, gapY = 70;
+    const row = Math.floor(i / cols);
+    let col = i % cols;
+    if (row % 2 === 1) col = cols - 1 - col;
+    return { x: 40 + col * (this.NODE_W + gapX), y: 30 + row * (this.NODE_H + gapY) };
+  }
+
+  private loadPositions() {
+    let saved: any = {};
+    try { saved = JSON.parse(localStorage.getItem(this.storageKey()) || '{}'); } catch {}
+    this.pos = {};
+    this.orderedNodes.forEach((n, i) => this.pos[n.id] = saved[n.id] || this.defaultPos(i));
+    this.updateLinks();
+  }
+
+  resetLayout() {
+    localStorage.removeItem(this.storageKey());
+    this.loadPositions();
+    this.cdr.detectChanges();
+  }
+
+  private updateLinks() {
+    let maxX = 0, maxY = 0;
+    Object.values(this.pos).forEach(p => { maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); });
+    this.canvasWidth = Math.max(900, maxX + this.NODE_W + 60);
+    this.canvasHeight = Math.max(420, maxY + this.NODE_H + 60);
+    this.links = [];
+    for (let i = 0; i < this.orderedNodes.length - 1; i++) {
+      const a = this.pos[this.orderedNodes[i].id], b = this.pos[this.orderedNodes[i + 1].id];
+      if (!a || !b) continue;
+      const ac = { x: a.x + this.NODE_W / 2, y: a.y + this.NODE_H / 2 };
+      const bc = { x: b.x + this.NODE_W / 2, y: b.y + this.NODE_H / 2 };
+      let s, e, d;
+      if (Math.abs(bc.x - ac.x) > Math.abs(bc.y - ac.y)) {
+        const dir = bc.x > ac.x ? 1 : -1;
+        s = { x: ac.x + dir * this.NODE_W / 2, y: ac.y };
+        e = { x: bc.x - dir * (this.NODE_W / 2 + 4), y: bc.y };
+        const mx = (s.x + e.x) / 2;
+        d = `M${s.x},${s.y} C${mx},${s.y} ${mx},${e.y} ${e.x},${e.y}`;
+      } else {
+        const dir = bc.y > ac.y ? 1 : -1;
+        s = { x: ac.x, y: ac.y + dir * this.NODE_H / 2 };
+        e = { x: bc.x, y: bc.y - dir * (this.NODE_H / 2 + 4) };
+        const my = (s.y + e.y) / 2;
+        d = `M${s.x},${s.y} C${s.x},${my} ${e.x},${my} ${e.x},${e.y}`;
+      }
+      this.links.push(d);
+    }
+  }
+
+  private dragStart = { mx: 0, my: 0, x: 0, y: 0 };
+  private rafPending = false;
+  private lastEv: MouseEvent | null = null;
+  private moveHandler = (ev: MouseEvent) => this.onDrag(ev);
+  private upHandler = () => this.endDrag();
+
+  startDrag(ev: MouseEvent, node: any) {
+    if (ev.button !== 0) return;
+    const p = this.pos[node.id];
+    this.dragId = node.id;
+    this.dragStart = { mx: ev.clientX, my: ev.clientY, x: p.x, y: p.y };
+    window.addEventListener('mousemove', this.moveHandler);
+    window.addEventListener('mouseup', this.upHandler);
+    document.body.style.cursor = 'grabbing';
+    ev.preventDefault();
+    this.cdr.detectChanges();
+  }
+
+  onDrag(ev: MouseEvent) {
+    if (!this.dragId) return;
+    this.lastEv = ev;
+    if (this.rafPending) return;
+    this.rafPending = true;
+    requestAnimationFrame(() => {
+      this.rafPending = false;
+      const e = this.lastEv;
+      if (!this.dragId || !e) return;
+      this.pos[this.dragId] = {
+        x: Math.max(0, this.dragStart.x + e.clientX - this.dragStart.mx),
+        y: Math.max(0, this.dragStart.y + e.clientY - this.dragStart.my)
+      };
+      this.updateLinks();
+      this.cdr.detectChanges();
+    });
+  }
+
+  endDrag() {
+    window.removeEventListener('mousemove', this.moveHandler);
+    window.removeEventListener('mouseup', this.upHandler);
+    document.body.style.cursor = '';
+    if (!this.dragId) return;
+    this.dragId = null;
+    localStorage.setItem(this.storageKey(), JSON.stringify(this.pos));
+    this.cdr.detectChanges();
   }
 
   toggleFlowStatus(status: boolean) {
@@ -600,6 +634,7 @@ export class WorkflowDesignerComponent implements OnInit {
 
   openAddNodeDialog() {
     this.editingNodeId = null;
+    this.selectedRequiredDocType = null;
     this.nodeForm = {
       name: '',
       departmentId: '',
@@ -616,6 +651,7 @@ export class WorkflowDesignerComponent implements OnInit {
 
   openEditNodeDialog(node: any) {
     this.editingNodeId = node.id;
+    this.selectedRequiredDocType = (node.requiredDocTypes && node.requiredDocTypes.length > 0) ? node.requiredDocTypes[0] : null;
     this.nodeForm = {
       name: node.name,
       departmentId: node.departmentId,
@@ -627,6 +663,15 @@ export class WorkflowDesignerComponent implements OnInit {
       typeEnvio: node.typeEnvio || 'PARA'
     };
     this.showNodeDialog = true;
+    this.cdr.detectChanges();
+  }
+
+  onRequiredDocTypeChange() {
+    if (this.selectedRequiredDocType) {
+      this.nodeForm.requiredDocTypes = [this.selectedRequiredDocType];
+    } else {
+      this.nodeForm.requiredDocTypes = [];
+    }
     this.cdr.detectChanges();
   }
 

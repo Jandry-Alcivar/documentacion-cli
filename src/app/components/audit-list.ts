@@ -35,13 +35,13 @@ import { AuditService } from '../services/audit.service.js';
           <ng-template pTemplate="body" let-log>
             <tr>
               <td>{{ log.createdAt | date:'medium' }}</td>
-              <td class="font-semibold text-white">{{ log.user?.name || 'Sistema' }}</td>
+              <td class="font-semibold text-dark">{{ log.user?.name || 'Sistema' }}</td>
               <td>
                 <span class="module-badge">{{ log.module }}</span>
               </td>
-              <td>{{ log.action }}</td>
+              <td><span class="action-tag">{{ log.action }}</span></td>
               <td class="font-mono text-xs">{{ log.recordId }}</td>
-              <td><code>{{ log.ipAddress || '127.0.0.1' }}</code></td>
+              <td><code class="ip-code">{{ log.ipAddress || '127.0.0.1' }}</code></td>
               <td>
                 <span class="details-text" [title]="log.details">{{ log.details || 'Sin detalles' }}</span>
               </td>
@@ -49,7 +49,7 @@ import { AuditService } from '../services/audit.service.js';
           </ng-template>
           <ng-template pTemplate="emptystate">
             <tr>
-              <td colspan="7" style="text-align: center; padding: 3rem;">No se encontraron registros de auditoría.</td>
+              <td colspan="7" style="text-align: center; padding: 3rem; color: #94a3b8;">No se encontraron registros de auditoría.</td>
             </tr>
           </ng-template>
         </p-table>
@@ -64,60 +64,55 @@ import { AuditService } from '../services/audit.service.js';
       font-family: 'Inter', system-ui, sans-serif;
     }
     .page-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     .page-header p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      margin: 0.3rem 0 0;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
     }
 
     .table-card {
-      background: rgba(15, 23, 42, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
-    :host ::ng-deep .custom-table .p-datatable-thead > tr > th {
-      background: rgba(15, 23, 42, 0.6) !important;
-      color: #94a3b8 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-      padding: 1rem !important;
-      font-weight: 600;
+    .text-dark {
+      color: #0f172a !important;
     }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr:hover {
-      background: rgba(255, 255, 255, 0.02) !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr > td {
-      padding: 1rem !important;
-      border: none !important;
-    }
-
     .module-badge {
-      background: rgba(99, 102, 241, 0.12);
-      color: #818cf8;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
       padding: 0.2rem 0.5rem;
       border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
     }
-
+    .action-tag {
+      font-weight: 600;
+      color: #334155;
+    }
+    .ip-code {
+      background: #f1f5f9;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #475569;
+    }
     .details-text {
       max-width: 250px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       display: inline-block;
-      color: #94a3b8;
+      color: #64748b;
     }
   `]
 })

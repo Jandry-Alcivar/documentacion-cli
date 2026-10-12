@@ -105,6 +105,18 @@ import { ChangeDetectorRef } from '@angular/core';
                     No tiene flujo predefinido, podrá asignar la ruta manualmente en el Paso 2.
                   </span>
                 </div>
+                <div class="route-preview" *ngIf="activeWorkflow?.nodes?.length">
+                  <div class="route-title"><i class="pi pi-sitemap"></i> Ruta del flujo: {{ activeWorkflow.name }}</div>
+                  <div class="route-steps">
+                    <ng-container *ngFor="let n of workflowRoute; let last = last; let i = index">
+                      <div class="route-step" [class.start]="n.isStart" [class.end]="n.isEnd">
+                        <span class="rs-num">{{ i + 1 }}</span>
+                        <div><strong>{{ n.name }}</strong><small>{{ n.department?.name }} · {{ n.maxHours }}h</small></div>
+                      </div>
+                      <i class="pi pi-arrow-right route-arrow" *ngIf="!last"></i>
+                    </ng-container>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -196,17 +208,17 @@ import { ChangeDetectorRef } from '@angular/core';
                 ></textarea>
               </div>
 
-              <div class="section-title full-width">Información del Solicitante</div>
+              <div class="section-title full-width">Información del Solicitante (Opcional)</div>
 
               <div class="form-field">
-                <label for="app-name">Nombre del Solicitante *</label>
+                <label for="app-name">Nombre del Solicitante (Opcional)</label>
                 <input 
                   type="text" 
                   id="app-name" 
                   name="app-name" 
                   pInputText 
                   [(ngModel)]="applicantName" 
-                  placeholder="Ej. Juan Pérez"
+                  placeholder="Ej. Juan Pérez (Dejar vacío para Trámite Interno)"
                   class="w-full"
                 />
               </div>
@@ -246,6 +258,32 @@ import { ChangeDetectorRef } from '@angular/core';
                   pInputText 
                   [(ngModel)]="applicantPhone" 
                   placeholder="Ej. 0998765432"
+                  class="w-full"
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="app-inst">Institución / Empresa / Organización</label>
+                <input 
+                  type="text" 
+                  id="app-inst" 
+                  name="app-inst" 
+                  pInputText 
+                  [(ngModel)]="applicantInstitution" 
+                  placeholder="Ej. Barrio Central / GAD Municipal / Empresa ABC"
+                  class="w-full"
+                />
+              </div>
+
+              <div class="form-field full-width">
+                <label for="app-addr">Dirección Domiciliaria / Institucional</label>
+                <input 
+                  type="text" 
+                  id="app-addr" 
+                  name="app-addr" 
+                  pInputText 
+                  [(ngModel)]="applicantAddress" 
+                  placeholder="Ej. Av. Principal #123 y Calle Secundaria"
                   class="w-full"
                 />
               </div>
@@ -440,13 +478,13 @@ import { ChangeDetectorRef } from '@angular/core';
       gap: 1rem;
     }
     .page-header h1 {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     :host ::ng-deep .btn-back {
-      color: #94a3b8 !important;
+      color: #64748b !important;
       font-weight: 600 !important;
     }
 
@@ -455,164 +493,184 @@ import { ChangeDetectorRef } from '@angular/core';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(30, 41, 59, 0.4);
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #ffffff;
+      padding: 1.25rem 2.5rem;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
     .step-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       z-index: 2;
     }
     .step-circle {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
-      background: #334155;
-      color: #94a3b8;
+      background: #f1f5f9;
+      color: #64748b;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 0.9rem;
-      border: 2px solid transparent;
+      font-size: 0.88rem;
+      border: 2px solid #cbd5e1;
       transition: all 0.3s;
     }
     .step-label {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: #64748b;
       transition: color 0.3s;
     }
     .step-item.active .step-circle {
-      background: #6366f1;
+      background: #1d4ed8;
       color: #ffffff;
-      border-color: #818cf8;
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
     }
     .step-item.active .step-label {
-      color: #f8fafc;
+      color: #1d4ed8;
+      font-weight: 700;
     }
     .step-item.completed .step-circle {
-      background: #22c55e;
+      background: #047857;
       color: #ffffff;
+      border-color: #047857;
     }
     .step-item.completed .step-label {
-      color: #cbd5e1;
+      color: #047857;
     }
     .step-line {
       flex: 1;
       height: 2px;
-      background: #334155;
+      background: #e2e8f0;
       margin: 0 1rem;
       margin-top: -1.2rem;
       transition: background 0.3s;
     }
     .step-line.active {
-      background: #6366f1;
+      background: #1d4ed8;
     }
 
-    /* Flow Card */
+      /* Flow Card */
+      .route-preview { margin-top: .9rem; background: #f8fafc; border: 1px solid #e0e7ff; border-radius: 10px; padding: .8rem; }
+      .route-title { font-weight: 700; color: #3730a3; font-size: .85rem; margin-bottom: .6rem; display: flex; gap: .35rem; align-items: center; }
+      .route-steps { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+      .route-step { display: flex; align-items: center; gap: .5rem; background: #fff; border: 1px solid #cbd5e1; border-left: 4px solid #3b82f6; border-radius: 8px; padding: .4rem .6rem; }
+      .route-step.start { border-left-color: #4f46e5; }
+      .route-step.end { border-left-color: #059669; }
+      .route-step strong { display: block; font-size: .82rem; color: #0f172a; }
+      .route-step small { font-size: .72rem; color: #475569; }
+      .rs-num { width: 20px; height: 20px; border-radius: 50%; background: #1e293b; color: #fff; font-size: .7rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+      .route-arrow { color: #6366f1; }
     .flow-info-card {
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.2);
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       border-radius: 8px;
-      padding: 1rem;
+      padding: 1.15rem;
       margin-top: 1rem;
     }
     .info-title {
       font-weight: 700;
-      font-size: 0.95rem;
-      color: #818cf8;
-      margin-bottom: 0.5rem;
+      font-size: 0.92rem;
+      color: #1d4ed8;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
     .flow-info-card p {
-      margin: 0 0 1rem 0;
+      margin: 0 0 0.8rem 0;
       font-size: 0.85rem;
-      color: #cbd5e1;
+      color: #334155;
     }
     .flow-meta {
       display: flex;
       gap: 1.5rem;
-      font-size: 0.8rem;
-      color: #94a3b8;
+      font-size: 0.82rem;
+      color: #475569;
+      flex-wrap: wrap;
     }
-    .text-indigo { color: #818cf8; }
-    .text-orange { color: #f59e0b; }
+    .text-indigo { color: #1d4ed8; }
+    .text-orange { color: #b45309; }
 
     /* Form Container */
     :host ::ng-deep .form-card {
-      background: rgba(15, 23, 42, 0.4) !important;
-      border: 1px solid rgba(255, 255, 255, 0.06) !important;
-      border-radius: 12px !important;
-      color: #ffffff !important;
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+      color: #0f172a !important;
     }
     .wizard-step {
-      padding: 1rem;
+      padding: 0.5rem;
     }
     .step-title {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 700;
       margin-top: 0;
-      margin-bottom: 1.5rem;
-      color: #f8fafc;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 1.25rem;
+      color: #0f172a;
+      border-bottom: 1px solid #f1f5f9;
       padding-bottom: 0.75rem;
     }
     .form-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
     .full-width {
       grid-column: span 2;
     }
     .section-title {
-      font-size: 1.05rem;
+      font-size: 0.98rem;
       font-weight: 700;
-      color: #818cf8;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.5rem;
-      margin-top: 1rem;
+      color: #1d4ed8;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.4rem;
+      margin-top: 0.8rem;
     }
     .form-field {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
     .form-field label {
       font-size: 0.85rem;
       font-weight: 600;
-      color: #cbd5e1;
+      color: #334155;
     }
     .help-text {
       font-size: 0.75rem;
-      color: #94a3b8;
+      color: #64748b;
     }
     :host ::ng-deep .form-field input {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #f8fafc !important;
-      border-radius: 8px !important;
-      padding: 0.6rem 0.8rem !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      border-radius: 6px !important;
+      padding: 0.55rem 0.8rem !important;
+      height: 38px;
     }
     :host ::ng-deep .form-dropdown {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      border-radius: 8px !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 6px !important;
+      height: 38px;
     }
     :host ::ng-deep .form-dropdown .p-select-label {
-      color: #f8fafc !important;
-      padding: 0.6rem 0.8rem !important;
+      color: #0f172a !important;
+      padding: 0.55rem 0.8rem !important;
     }
     .form-textarea {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #f8fafc;
-      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
+      border-radius: 6px;
       padding: 0.8rem;
       font-family: inherit;
       resize: vertical;
@@ -620,7 +678,7 @@ import { ChangeDetectorRef } from '@angular/core';
       transition: border-color 0.2s;
     }
     .form-textarea:focus {
-      border-color: #818cf8;
+      border-color: #1d4ed8;
     }
     
     /* Anexos */
@@ -628,32 +686,33 @@ import { ChangeDetectorRef } from '@angular/core';
       display: grid;
       grid-template-columns: repeat(3, 1fr) auto;
       gap: 1rem;
-      background: rgba(15, 23, 42, 0.3);
+      background: #f8fafc;
       padding: 1rem;
       border-radius: 8px;
-      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border: 1px dashed #cbd5e1;
     }
     .file-input-raw {
       padding: 0.4rem;
-      color: #94a3b8;
+      color: #475569;
     }
     .flex-end-btn {
       display: flex;
       align-items: flex-end;
     }
     .anexo-list-wrapper h4 {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       margin-bottom: 0.5rem;
-      color: #cbd5e1;
+      color: #0f172a;
+      font-weight: 700;
     }
     .anexo-badge {
       display: flex;
       align-items: center;
       gap: 1rem;
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
       padding: 0.5rem 1rem;
-      border-radius: 8px;
+      border-radius: 6px;
       margin-bottom: 0.5rem;
     }
     .anexo-meta {
@@ -663,18 +722,18 @@ import { ChangeDetectorRef } from '@angular/core';
     }
     .anexo-meta strong {
       font-size: 0.85rem;
-      color: #f8fafc;
+      color: #0f172a;
     }
     .anexo-meta span {
       font-size: 0.75rem;
-      color: #94a3b8;
+      color: #64748b;
     }
 
     /* Summary Step */
     .summary-wrapper {
       position: relative;
-      background: rgba(30, 41, 59, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
@@ -695,31 +754,31 @@ import { ChangeDetectorRef } from '@angular/core';
       color: #64748b;
     }
     .summary-item .val {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #f8fafc;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #0f172a;
     }
     .summary-item ul {
       margin: 0;
       padding-left: 1.2rem;
       font-size: 0.85rem;
-      color: #cbd5e1;
+      color: #334155;
     }
 
     /* Status badges for summary */
     .status-badge {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 0.2rem 0.5rem;
+      padding: 0.2rem 0.55rem;
       border-radius: 6px;
       text-transform: uppercase;
       display: inline-block;
       width: fit-content;
     }
-    .badge-baja { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
-    .badge-normal { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
-    .badge-alta { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-    .badge-urgente { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .badge-baja { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .badge-normal { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .badge-alta { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+    .badge-urgente { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
     /* Loading Overlay */
     .loading-overlay {
@@ -728,28 +787,28 @@ import { ChangeDetectorRef } from '@angular/core';
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       border-radius: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 1rem;
-      color: #f8fafc;
+      color: #0f172a;
       z-index: 10;
     }
     .spinner-large {
       font-size: 2rem;
-      color: #6366f1;
+      color: #1d4ed8;
     }
 
     /* Actions buttons */
     .wizard-actions {
-      margin-top: 2rem;
+      margin-top: 1.5rem;
       display: flex;
       justify-content: space-between;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 1.5rem;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 1.25rem;
     }
   `]
 })
@@ -774,6 +833,8 @@ export class ProcedureCreateComponent implements OnInit {
   applicantId = '';
   applicantEmail = '';
   applicantPhone = '';
+  applicantInstitution = '';
+  applicantAddress = '';
 
   // Step 3 Document Creation
   selectedDocType: string | null = null;
@@ -835,7 +896,11 @@ export class ProcedureCreateComponent implements OnInit {
 
   loadWorkflows() {
     this.http.get<any[]>('http://localhost:3001/api/workflows').subscribe({
-      next: (res) => { this.workflows = res.filter(w => w.isActive); this.cdr.detectChanges(); }
+      next: (res) => {
+        this.workflows = res.filter(w => w.isActive);
+        if (this.selectedType) this.onTypeChange();
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -876,20 +941,39 @@ export class ProcedureCreateComponent implements OnInit {
     return this.docTypes.find(d => d.id === this.selectedDocType);
   }
 
+  get workflowRoute(): any[] {
+    const nodes = this.activeWorkflow?.nodes || [];
+    return [...nodes].sort((a: any, b: any) => {
+      if (a.isStart !== b.isStart) return a.isStart ? -1 : 1;
+      if (a.isEnd !== b.isEnd) return a.isEnd ? 1 : -1;
+      return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+    });
+  }
+
   onTypeChange() {
     // Buscar si existe un flujo preconfigurado para este tipo de trámite
-    this.activeWorkflow = this.workflows.find(w => w.procedureTypeId === this.selectedType);
+    const candidates = this.workflows.filter(w => w.procedureTypeId === this.selectedType);
+    this.activeWorkflow = candidates.find(w => w.nodes?.length > 0) || candidates[0] || null;
     this.selectedDept = null;
     this.selectedUser = null;
     this.deptUsers = [];
 
     if (this.activeWorkflow && this.activeWorkflow.nodes && this.activeWorkflow.nodes.length > 0) {
-      // Tomar el nodo inicial
-      const startNode = this.activeWorkflow.nodes.find((n: any) => n.isStart === true);
+      // Tomar el nodo inicial (o el primero si no hay marcado)
+      const route = this.workflowRoute;
+      const startNode = route[0];
       if (startNode) {
         this.selectedDept = startNode.departmentId;
         // Asignar automáticamente el departamento y bloquear su modificación
         this.onDeptChange();
+
+        // Concordancia con documentos requeridos del flujo
+        if (startNode.requiredDocTypes && startNode.requiredDocTypes.length > 0) {
+          const reqDocTypeId = startNode.requiredDocTypes[0];
+          if (this.docTypes.some(dt => dt.id === reqDocTypeId)) {
+            this.selectedDocType = reqDocTypeId;
+          }
+        }
       }
     }
   }
@@ -932,7 +1016,7 @@ export class ProcedureCreateComponent implements OnInit {
 
   nextStep() {
     if (this.currentStep === 1 && !this.selectedType) return;
-    if (this.currentStep === 2 && (!this.subject || !this.selectedDept || !this.selectedUser || !this.applicantName)) return;
+    if (this.currentStep === 2 && (!this.subject || !this.selectedDept || !this.selectedUser)) return;
     if (this.currentStep === 3 && (!this.selectedDocType || !this.docTitle || !this.docContent)) return;
 
     this.currentStep++;
@@ -982,10 +1066,12 @@ export class ProcedureCreateComponent implements OnInit {
       subject: this.subject,
       description: this.description,
       priority: this.selectedPriority,
-      applicantName: this.applicantName,
+      applicantName: this.applicantName?.trim() || 'Trámite Interno',
       applicantId: this.applicantId || null,
       applicantEmail: this.applicantEmail || null,
       applicantPhone: this.applicantPhone || null,
+      applicantInstitution: this.applicantInstitution || null,
+      applicantAddress: this.applicantAddress || null,
       typeId: this.selectedType,
       departmentId: this.selectedDept,
       assigneeId: this.selectedUser || null

@@ -252,13 +252,13 @@ import { TemplateService } from '../services/template.service.js';
       gap: 1rem;
     }
     .page-header h1 {
-      font-size: 1.6rem;
-      font-weight: 800;
+      font-size: 1.5rem;
+      font-weight: 700;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     :host ::ng-deep .btn-back {
-      color: #94a3b8 !important;
+      color: #475569 !important;
       font-weight: 600 !important;
     }
 
@@ -266,13 +266,13 @@ import { TemplateService } from '../services/template.service.js';
     .create-type-selection {
       display: flex;
       gap: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid #e2e8f0;
       padding-bottom: 1rem;
     }
     .btn-select-type {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #94a3b8;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #475569;
       padding: 0.8rem 1.5rem;
       font-size: 0.95rem;
       font-weight: 600;
@@ -284,21 +284,23 @@ import { TemplateService } from '../services/template.service.js';
       transition: all 0.2s;
     }
     .btn-select-type:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: #ffffff;
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: #94a3b8;
     }
     .btn-select-type.active {
-      background: rgba(99, 102, 241, 0.1);
-      border-color: #6366f1;
-      color: #818cf8;
+      background: #eff6ff;
+      border-color: #1d4ed8;
+      color: #1d4ed8;
     }
 
     /* Form Container */
     :host ::ng-deep .form-card {
-      background: rgba(15, 23, 42, 0.4) !important;
-      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
       border-radius: 12px !important;
-      color: #ffffff !important;
+      color: #0f172a !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
     }
     .create-form {
       padding: 1rem;
@@ -319,37 +321,44 @@ import { TemplateService } from '../services/template.service.js';
     .form-field label {
       font-size: 0.85rem;
       font-weight: 600;
-      color: #cbd5e1;
+      color: #334155;
     }
     :host ::ng-deep .form-field input {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #f8fafc !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
       border-radius: 8px !important;
       padding: 0.6rem 0.8rem !important;
     }
+    :host ::ng-deep .form-field input:focus {
+      background: #ffffff !important;
+      border-color: #1d4ed8 !important;
+      box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15) !important;
+    }
     :host ::ng-deep .form-dropdown {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
       border-radius: 8px !important;
     }
     :host ::ng-deep .form-dropdown .p-dropdown-label {
-      color: #f8fafc !important;
+      color: #0f172a !important;
       padding: 0.6rem 0.8rem !important;
     }
     .form-textarea {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #f8fafc;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
       border-radius: 8px;
       padding: 0.8rem;
       font-family: inherit;
       resize: vertical;
       outline: none;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
     }
     .form-textarea:focus {
-      border-color: #818cf8;
+      background: #ffffff;
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
     }
     .font-mono {
       font-family: 'Courier New', Courier, monospace;
@@ -360,17 +369,17 @@ import { TemplateService } from '../services/template.service.js';
     /* File Upload Zone */
     .file-upload-zone {
       position: relative;
-      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border: 2px dashed #cbd5e1;
       border-radius: 10px;
       padding: 2.5rem 1.5rem;
       text-align: center;
-      background: rgba(15, 23, 42, 0.4);
+      background: #f8fafc;
       cursor: pointer;
       transition: all 0.2s;
     }
     .file-upload-zone:hover {
-      border-color: #6366f1;
-      background: rgba(99, 102, 241, 0.02);
+      border-color: #1d4ed8;
+      background: #eff6ff;
     }
     .file-input {
       position: absolute;
@@ -387,42 +396,44 @@ import { TemplateService } from '../services/template.service.js';
       flex-direction: column;
       align-items: center;
       gap: 0.6rem;
-      color: #94a3b8;
+      color: #64748b;
     }
     .upload-prompt i {
       font-size: 2.5rem;
-      color: #6366f1;
+      color: #1d4ed8;
     }
     .upload-prompt span {
       font-size: 1rem;
       font-weight: 600;
-      color: #cbd5e1;
+      color: #0f172a;
     }
     .upload-prompt p {
       font-size: 0.75rem;
       margin: 0;
+      color: #64748b;
     }
     .selected-file-info {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 1rem;
-      color: #f8fafc;
+      color: #0f172a;
       z-index: 3;
       position: relative;
     }
     .selected-file-info i {
       font-size: 2rem;
-      color: #f43f5e;
+      color: #e11d48;
     }
     .file-name {
       font-weight: 600;
       font-size: 0.95rem;
+      color: #0f172a;
     }
     .file-size {
       font-size: 0.8rem;
-      color: #94a3b8;
-      background: rgba(255, 255, 255, 0.08);
+      color: #475569;
+      background: #e2e8f0;
       padding: 0.1rem 0.4rem;
       border-radius: 4px;
     }

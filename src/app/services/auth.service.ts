@@ -72,6 +72,12 @@ export class AuthService {
     return perms.includes('all') || perms.includes(permission);
   }
 
+  hasAnyPermission(permissions: string[]): boolean {
+    const perms = this.getPermissions();
+    if (perms.includes('all')) return true;
+    return permissions.some(p => perms.includes(p));
+  }
+
   isAdmin(): boolean {
     return this.currentUser()?.role?.name === 'Administrador';
   }

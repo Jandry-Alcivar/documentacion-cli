@@ -10,11 +10,23 @@ export class ReportService {
 
   constructor(private http: HttpClient) {}
 
-  getProceduresReport(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/procedures`);
+  private cleanParams(filters: any): Record<string, string> {
+    const params: Record<string, string> = {};
+    if (!filters) return params;
+    for (const key of Object.keys(filters)) {
+      const val = filters[key];
+      if (val !== undefined && val !== null && val !== '' && val !== 'undefined') {
+        params[key] = String(val);
+      }
+    }
+    return params;
   }
 
-  getDocumentsReport(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/documents`);
+  getProceduresReport(filters?: { departmentId?: string; status?: string; startDate?: string; endDate?: string }): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/procedures`, { params: this.cleanParams(filters) });
+  }
+
+  getDocumentsReport(filters?: { departmentId?: string; status?: string; typeId?: string; startDate?: string; endDate?: string }): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/documents`, { params: this.cleanParams(filters) });
   }
 }

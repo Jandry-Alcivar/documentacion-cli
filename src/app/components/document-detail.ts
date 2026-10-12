@@ -137,6 +137,14 @@ import { DepartmentService } from '../services/department.service.js';
                     </span>
                   </span>
                 </div>
+                <div class="meta-row" *ngIf="document.procedure">
+                  <span class="label">Expediente / Trámite:</span>
+                  <span class="val">
+                    <a [routerLink]="['/procedures']" style="color: #818cf8; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">
+                      <i class="pi pi-folder-open"></i> {{ document.procedure.code }} - {{ document.procedure.subject }}
+                    </a>
+                  </span>
+                </div>
                 <div class="meta-row" *ngIf="document.rejectionNotes">
                   <span class="label text-red">Notas de Rechazo:</span>
                   <span class="val text-red font-semibold">"{{ document.rejectionNotes }}"</span>
@@ -660,106 +668,110 @@ import { DepartmentService } from '../services/department.service.js';
       gap: 1rem;
     }
     .page-header h1 {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     .doc-code-badge {
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
-      padding: 0.2rem 0.5rem;
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 0.2rem 0.6rem;
       border-radius: 6px;
-      font-size: 0.85rem;
-      border: 1px solid rgba(99, 102, 241, 0.25);
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid #bfdbfe;
     }
     :host ::ng-deep .btn-back {
-      color: #94a3b8 !important;
+      color: #64748b !important;
       font-weight: 600 !important;
     }
 
     /* Integrity Alert Card */
     .integrity-card {
       display: flex;
-      gap: 1.5rem;
-      padding: 1.5rem;
-      border-radius: 12px;
+      gap: 1.25rem;
+      padding: 1.25rem 1.5rem;
+      border-radius: 10px;
       border: 1px solid;
       align-items: flex-start;
     }
     .integrity-ok {
-      background: rgba(34, 197, 94, 0.08);
-      border-color: rgba(34, 197, 94, 0.25);
-      color: #4ade80;
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #047857;
     }
     .integrity-fail {
-      background: rgba(239, 68, 68, 0.08);
-      border-color: rgba(239, 68, 68, 0.25);
-      color: #f87171;
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #b91c1c;
     }
     .integrity-icon i {
-      font-size: 2.2rem;
+      font-size: 2rem;
     }
     .integrity-text h3 {
-      font-size: 1.2rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      margin: 0 0 0.4rem;
+      margin: 0 0 0.35rem;
     }
     .integrity-text p {
-      font-size: 0.9rem;
-      margin: 0 0 0.8rem;
+      font-size: 0.88rem;
+      margin: 0 0 0.6rem;
       line-height: 1.5;
-      color: #e2e8f0;
+      color: #334155;
     }
     .hash-details {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
-      font-size: 0.8rem;
-      color: #94a3b8;
+      gap: 0.25rem;
+      font-size: 0.78rem;
+      color: #64748b;
     }
     .hash-details code {
       font-family: 'Courier New', Courier, monospace;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 0.1rem 0.4rem;
+      background: #ffffff;
+      padding: 0.15rem 0.4rem;
       border-radius: 4px;
-      color: #cbd5e1;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
     }
 
     /* Tabs Layout */
     .tabs-container {
       display: flex;
-      gap: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.1rem;
+      gap: 0.35rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0;
     }
     .tab-btn {
       background: transparent;
       border: none;
-      color: #94a3b8;
-      padding: 0.8rem 1.2rem;
-      font-size: 0.9rem;
+      color: #64748b;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
       transition: all 0.2s;
     }
     .tab-btn:hover {
-      color: #f8fafc;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 6px 6px 0 0;
+      color: #0f172a;
+      background: #f8fafc;
     }
     .active-tab {
-      color: #818cf8;
-      border-bottom-color: #6366f1;
+      color: #1d4ed8;
+      border-bottom-color: #1d4ed8;
+      background: #ffffff;
+      font-weight: 700;
     }
 
     /* Detail Grid Layout */
     .tab-pane-content {
-      animation: fadeIn 0.3s ease-out;
+      animation: fadeIn 0.25s ease-out;
     }
     .detail-grid {
       display: grid;
@@ -775,17 +787,18 @@ import { DepartmentService } from '../services/department.service.js';
     :host ::ng-deep .info-card, 
     :host ::ng-deep .actions-card, 
     :host ::ng-deep .history-card {
-      background: rgba(15, 23, 42, 0.4) !important;
-      border: 1px solid rgba(255, 255, 255, 0.06) !important;
-      border-radius: 12px !important;
-      color: #ffffff !important;
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+      color: #0f172a !important;
     }
     :host ::ng-deep .p-card-title {
-      font-size: 1.1rem !important;
+      font-size: 1.05rem !important;
       font-weight: 700 !important;
-      color: #ffffff !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-      padding-bottom: 0.8rem !important;
+      color: #0f172a !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      padding-bottom: 0.75rem !important;
     }
     
     /* Metadata general */
@@ -797,35 +810,36 @@ import { DepartmentService } from '../services/department.service.js';
     .meta-row {
       display: flex;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid #f1f5f9;
       padding-bottom: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
     .meta-row .label {
-      color: #94a3b8;
+      color: #64748b;
       font-weight: 500;
     }
     .meta-row .val {
-      color: #ffffff;
+      color: #0f172a;
       font-weight: 600;
       text-align: right;
     }
     .internal-content-preview h4 {
-      font-size: 0.95rem;
-      color: #cbd5e1;
+      font-size: 0.92rem;
+      color: #0f172a;
       margin: 0 0 0.5rem;
+      font-weight: 700;
     }
     .wysiwyg-box {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 1rem;
       font-family: 'Courier New', Courier, monospace;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       white-space: pre-wrap;
       max-height: 400px;
       overflow-y: auto;
-      color: #f1f5f9;
+      color: #1e293b;
       line-height: 1.5;
     }
 
@@ -836,14 +850,14 @@ import { DepartmentService } from '../services/department.service.js';
       gap: 1rem;
     }
     .workflow-action-box {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 1rem;
     }
     .workflow-action-box p {
       font-size: 0.85rem;
-      color: #94a3b8;
+      color: #64748b;
       margin: 0 0 0.8rem;
     }
     .flex-row {
@@ -866,10 +880,11 @@ import { DepartmentService } from '../services/department.service.js';
       font-size: 0.75rem;
     }
     .timeline-content-card {
-      background: rgba(30, 41, 59, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
       padding: 1rem;
       border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       margin-bottom: 1.5rem;
     }
     .timeline-date {
@@ -881,34 +896,23 @@ import { DepartmentService } from '../services/department.service.js';
     .timeline-user {
       font-size: 0.9rem;
       font-weight: 700;
-      color: #ffffff;
-      margin: 0 0 0.5rem 0;
+      color: #0f172a;
+      margin: 0 0 0.35rem 0;
     }
     .timeline-desc {
       font-size: 0.85rem;
-      color: #cbd5e1;
-      margin: 0.5rem 0 0 0;
+      color: #334155;
+      margin: 0.4rem 0 0 0;
       line-height: 1.4;
     }
 
-    /* Table Styles */
-    :host ::ng-deep .timeline-table .p-datatable-thead > tr > th {
-      background: #1e293b !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      font-weight: 600 !important;
-    }
-    :host ::ng-deep .timeline-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #e2e8f0 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
     .badge-op {
       font-size: 0.7rem;
       font-weight: 700;
-      padding: 0.1rem 0.4rem;
+      padding: 0.15rem 0.45rem;
       border-radius: 4px;
       text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
     .badge-create, .badge-create_internal { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
     .badge-approve { background: rgba(34, 197, 94, 0.15); color: #4ade80; }

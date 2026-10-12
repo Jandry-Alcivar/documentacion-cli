@@ -11,6 +11,7 @@ import { MessageService } from 'primeng/api';
 import { DepartmentService } from '../services/department.service.js';
 import { RoleService } from '../services/role.service.js';
 import { CatalogService } from '../services/catalog.service.js';
+import { ProcedureService } from '../services/procedure.service.js';
 
 @Component({
   selector: 'app-catalog-list',
@@ -46,6 +47,7 @@ import { CatalogService } from '../services/catalog.service.js';
         <button class="tab-btn" [class.active-tab]="activeTab === 'format'" (click)="activeTab = 'format'"><i class="pi pi-sliders-h"></i> Formato de Hoja</button>
         <button class="tab-btn" [class.active-tab]="activeTab === 'periods'" (click)="activeTab = 'periods'"><i class="pi pi-calendar"></i> Periodos</button>
         <button class="tab-btn" [class.active-tab]="activeTab === 'exts'" (click)="activeTab = 'exts'"><i class="pi pi-file-excel"></i> Extensiones</button>
+        <button class="tab-btn" [class.active-tab]="activeTab === 'immutability'" (click)="activeTab = 'immutability'"><i class="pi pi-shield"></i> Inmutabilidad</button>
       </div>
 
       <div class="catalog-content-card">
@@ -68,7 +70,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-d>
               <tr>
-                <td class="font-semibold text-white">{{ d.name }}</td>
+                <td class="font-semibold text-dark">{{ d.name }}</td>
                 <td>{{ d.description }}</td>
                 <td>
                   <div class="action-buttons flex gap-2 justify-content-center">
@@ -104,7 +106,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-r>
               <tr>
-                <td class="font-semibold text-white">{{ r.name }}</td>
+                <td class="font-semibold text-dark">{{ r.name }}</td>
                 <td>{{ r.description }}</td>
                 <td class="perm-cell">
                   <span class="perm-token" *ngFor="let p of r.permissions">{{ p }}</span>
@@ -143,7 +145,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-dt>
               <tr>
-                <td class="font-semibold text-white">{{ dt.name }}</td>
+                <td class="font-semibold text-dark">{{ dt.name }}</td>
                 <td>{{ dt.description }}</td>
                 <td>{{ dt.isActive ? 'Activo' : 'Inactivo' }}</td>
                 <td>
@@ -178,7 +180,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-pt>
               <tr>
-                <td class="font-semibold text-white">{{ pt.name }}</td>
+                <td class="font-semibold text-dark">{{ pt.name }}</td>
                 <td>{{ pt.description }}</td>
                 <td>{{ pt.estimatedDays }} días</td>
                 <td>{{ pt.isActive ? 'Activo' : 'Inactivo' }}</td>
@@ -214,7 +216,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-w>
               <tr>
-                <td class="font-semibold text-white">{{ w.name }}</td>
+                <td class="font-semibold text-dark">{{ w.name }}</td>
                 <td>{{ w.location }}</td>
                 <td>{{ w.type }}</td>
                 <td class="text-center">
@@ -312,7 +314,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-p>
               <tr>
-                <td class="font-semibold text-white">{{ p.startDate | date:'shortDate' }}</td>
+                <td class="font-semibold text-dark">{{ p.startDate | date:'shortDate' }}</td>
                 <td>{{ p.endDate | date:'shortDate' }}</td>
                 <td><span class="status-badge" [ngClass]="p.status === 'ACTIVO' ? 'badge-active' : 'badge-inactive'">{{ p.status }}</span></td>
                 <td>
@@ -351,7 +353,7 @@ import { CatalogService } from '../services/catalog.service.js';
             </ng-template>
             <ng-template pTemplate="body" let-ft>
               <tr>
-                <td class="font-semibold text-white uppercase">{{ ft.extension }}</td>
+                <td class="font-semibold text-dark uppercase">{{ ft.extension }}</td>
                 <td>{{ ft.isActive ? 'Permitida' : 'Restringida' }}</td>
                 <td class="text-center">
                   <button 
@@ -369,6 +371,74 @@ import { CatalogService } from '../services/catalog.service.js';
           </p-table>
         </div>
 
+        <!-- 9. POLÍTICA DE INMUTABILIDAD Y SELLADO CRIPTOGRÁFICO -->
+        <div *ngIf="activeTab === 'immutability'" class="catalog-pane">
+          <div class="pane-header">
+            <div>
+              <h3 style="margin: 0; color: #0f172a; font-weight: 800;">
+                <i class="pi pi-shield text-indigo-600 mr-2"></i>Política de Inmutabilidad & Sellado Criptográfico
+              </h3>
+              <p style="margin: 0.35rem 0 0; color: #64748b; font-size: 0.88rem;">
+                Configura el comportamiento del sistema ante la finalización y sellado digital (SHA-256) de los trámites.
+              </p>
+            </div>
+          </div>
+
+          <div class="immutability-config-grid">
+            <div class="immutability-card" [class.selected]="immutabilityMode === 'REOPEN'" (click)="immutabilityMode = 'REOPEN'">
+              <div class="card-radio-header">
+                <input type="radio" name="immutMode" [checked]="immutabilityMode === 'REOPEN'" />
+                <h4>Opción 1: Reapertura Controlada (Recomendado)</h4>
+              </div>
+              <p class="card-desc">
+                Al concluir el trámite se genera automáticamente un sello criptográfico SHA-256 de todos sus documentos. 
+                Los operadores quedan bloqueados. <strong>Únicamente el Administrador</strong> podrá autorizar la reapertura 
+                ingresando una <strong>justificación técnica obligatoria</strong>. Todo queda registrado en la bitácora de auditoría.
+              </p>
+              <div class="card-features">
+                <span><i class="pi pi-check text-green-600 mr-1"></i> Sello SHA-256 automático</span>
+                <span><i class="pi pi-check text-green-600 mr-1"></i> Corrección de errores con auditoría</span>
+                <span><i class="pi pi-check text-green-600 mr-1"></i> Trazabilidad de sellos previos</span>
+              </div>
+            </div>
+
+            <div class="immutability-card" [class.selected]="immutabilityMode === 'LOCKED'" (click)="immutabilityMode = 'LOCKED'">
+              <div class="card-radio-header">
+                <input type="radio" name="immutMode" [checked]="immutabilityMode === 'LOCKED'" />
+                <h4 style="color: #991b1b;">Opción 2: Bloqueo Total Permanente</h4>
+              </div>
+              <p class="card-desc">
+                Inmutabilidad estricta. Una vez que un trámite pasa al estado <strong>FINALIZADO</strong>, 
+                <strong>nadie (ni siquiera los Administradores)</strong> podrá reabrirlo, revertirlo ni modificar sus documentos. 
+                Cualquier enmienda requerirá la apertura de un nuevo expediente formal.
+              </p>
+              <div class="card-features">
+                <span><i class="pi pi-lock text-red-600 mr-1"></i> Inmutabilidad 100% estricta</span>
+                <span><i class="pi pi-ban text-red-600 mr-1"></i> Bloqueo de reaperturas</span>
+                <span><i class="pi pi-shield text-red-600 mr-1"></i> Máxima garantía legal</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-callout mt-3">
+            <i class="pi pi-info-circle mr-2 text-indigo-500" style="font-size: 1.25rem;"></i>
+            <div>
+              <strong>Garantía de Integridad en Tiempo Real:</strong>
+              <p style="margin: 0.2rem 0 0; font-size: 0.83rem; color: #475569;">
+                Cada vez que se consulta un expediente finalizado, el sistema calcula en vivo el hash SHA-256 del contenido actual
+                y lo contrasta con el sello original. Si detecta una alteración no autorizada (por ejemplo, alteración directa en base de datos),
+                se disparará una alerta visual de seguridad y un registro en auditoría.
+              </p>
+            </div>
+          </div>
+
+          <div class="pane-footer mt-4">
+            <button class="p-button p-button-success" (click)="saveImmutabilityMode()" [disabled]="savingImmutability">
+              <i class="pi pi-spin pi-spinner mr-1" *ngIf="savingImmutability"></i>
+              <i class="pi pi-save mr-1" *ngIf="!savingImmutability"></i> Guardar Política de Inmutabilidad
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- DIALOGO: DEPARTAMENTO -->
@@ -564,56 +634,59 @@ import { CatalogService } from '../services/catalog.service.js';
       font-family: 'Inter', system-ui, sans-serif;
     }
     .page-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
       margin: 0;
-      color: #ffffff;
+      color: #0f172a;
     }
     .page-header p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      margin: 0.3rem 0 0;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.25rem 0 0;
     }
 
     /* Tabs */
     .tabs-container {
       display: flex;
-      gap: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.1rem;
+      gap: 0.35rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0;
       overflow-x: auto;
     }
     .tab-btn {
       background: transparent;
       border: none;
-      color: #94a3b8;
-      padding: 0.8rem 1.2rem;
-      font-size: 0.9rem;
+      color: #64748b;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
       transition: all 0.2s;
       white-space: nowrap;
     }
     .tab-btn:hover {
-      color: #f8fafc;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 6px 6px 0 0;
+      color: #0f172a;
+      background: #f8fafc;
     }
     .active-tab {
-      color: #818cf8;
-      border-bottom-color: #6366f1;
+      color: #1d4ed8;
+      border-bottom-color: #1d4ed8;
+      background: #ffffff;
+      font-weight: 700;
     }
 
     /* Panel Content Card */
     .catalog-content-card {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
       padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
     .pane-header {
       display: flex;
@@ -623,8 +696,9 @@ import { CatalogService } from '../services/catalog.service.js';
     }
     .pane-header h3 {
       margin: 0;
-      font-size: 1.1rem;
-      color: #ffffff;
+      font-size: 1.05rem;
+      color: #0f172a;
+      font-weight: 700;
     }
 
     /* Live pre-visualization format panel grid */
@@ -637,30 +711,47 @@ import { CatalogService } from '../services/catalog.service.js';
     .sliders-panel {
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
-      background: rgba(30, 41, 59, 0.3);
+      gap: 1.1rem;
+      background: #ffffff;
       padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
     }
     .slider-field {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      padding: 0.75rem 0.9rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #4f46e5;
+      border-radius: 10px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .slider-field:hover {
+      border-color: #c7d2fe;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.12);
     }
     .slider-field label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #cbd5e1;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0f172a;
     }
     .custom-slider {
       width: 100%;
       cursor: pointer;
-      accent-color: #6366f1;
+      accent-color: #4f46e5;
+      height: 6px;
     }
     .preview-panel {
       display: flex;
       justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
+      border: 1px solid #c7d2fe;
     }
     .mock-sheet {
       width: 320px;
@@ -668,7 +759,9 @@ import { CatalogService } from '../services/catalog.service.js';
       background: #ffffff;
       color: #1e293b;
       border-radius: 6px;
-      box-shadow: var(--shadow-premium);
+      box-shadow: 0 20px 40px -12px rgba(30, 41, 59, 0.35);
+      outline: 1px dashed #a5b4fc;
+      outline-offset: -1px;
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
@@ -711,20 +804,6 @@ import { CatalogService } from '../services/catalog.service.js';
     }
 
     /* Tables */
-    :host ::ng-deep .custom-table .p-datatable-thead > tr > th {
-      background: #1e293b !important;
-      color: #cbd5e1 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      font-weight: 600 !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr {
-      background: transparent !important;
-      color: #e2e8f0 !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    :host ::ng-deep .custom-table .p-datatable-tbody > tr:hover {
-      background: rgba(255, 255, 255, 0.02) !important;
-    }
     .action-buttons {
       display: flex;
       gap: 0.25rem;
@@ -741,11 +820,11 @@ import { CatalogService } from '../services/catalog.service.js';
     .perm-token {
       font-size: 0.7rem;
       font-weight: 600;
-      color: #a5b4fc;
-      background: rgba(99, 102, 241, 0.15);
+      color: #1d4ed8;
+      background: #eff6ff;
       padding: 0.1rem 0.4rem;
       border-radius: 4px;
-      border: 1px solid rgba(99, 102, 241, 0.2);
+      border: 1px solid #bfdbfe;
     }
 
     /* Add Extension Form */
@@ -760,20 +839,22 @@ import { CatalogService } from '../services/catalog.service.js';
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
-      color: #cbd5e1;
+      color: #0f172a;
     }
     .form-vertical label {
       font-size: 0.85rem;
       font-weight: 600;
+      color: #334155;
     }
     :host ::ng-deep .form-vertical input[type="text"],
     :host ::ng-deep .form-vertical input[type="number"],
     :host ::ng-deep .form-vertical input[type="date"] {
-      background: rgba(15, 23, 42, 0.6) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #f8fafc !important;
-      border-radius: 8px !important;
+      background: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      border-radius: 6px !important;
       padding: 0.5rem 0.8rem !important;
+      height: 38px;
     }
     .mb-3 { margin-bottom: 0.8rem; }
     .flex-row {
@@ -784,9 +865,9 @@ import { CatalogService } from '../services/catalog.service.js';
 
     /* Checklist */
     .permissions-checklist {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 6px;
       padding: 0.8rem;
       max-height: 200px;
       overflow-y: auto;
@@ -800,6 +881,7 @@ import { CatalogService } from '../services/catalog.service.js';
       gap: 0.5rem;
       font-size: 0.85rem;
       cursor: pointer;
+      color: #334155;
     }
     .status-badge {
       font-size: 0.7rem;
@@ -808,13 +890,84 @@ import { CatalogService } from '../services/catalog.service.js';
       border-radius: 4px;
       text-transform: uppercase;
     }
-    .badge-active { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-    .badge-inactive { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .badge-active { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .badge-inactive { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
     
     .font-semibold { font-weight: 600; }
     .font-mono { font-family: 'Courier New', Courier, monospace; }
-    .text-white { color: #ffffff; }
+    .text-white { color: #0f172a !important; }
     .text-center { text-align: center; }
+
+    /* Immutability Config Pane Styles */
+    .immutability-config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .immutability-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      position: relative;
+    }
+    .immutability-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+    .immutability-card.selected {
+      border-color: #4f46e5;
+      background: #f8faff;
+      box-shadow: 0 0 0 1px #4f46e5, 0 8px 20px rgba(79, 70, 229, 0.12);
+    }
+    .card-radio-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .card-radio-header h4 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .card-desc {
+      margin: 0;
+      font-size: 0.86rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+    .card-features {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #334155;
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px dashed #e2e8f0;
+    }
+    .info-callout {
+      display: flex;
+      align-items: flex-start;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid #4f46e5;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .pane-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
   `]
 })
 export class CatalogListComponent implements OnInit {
@@ -904,10 +1057,15 @@ export class CatalogListComponent implements OnInit {
   periodEndDate = '';
   periodStatus = 'ACTIVO';
 
+  // 8. Immutability Mode
+  immutabilityMode: 'REOPEN' | 'LOCKED' = 'REOPEN';
+  savingImmutability = false;
+
   constructor(
     private departmentService: DepartmentService,
     private roleService: RoleService,
     private catalogService: CatalogService,
+    private procedureService: ProcedureService,
     private http: HttpClient,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef
@@ -922,6 +1080,43 @@ export class CatalogListComponent implements OnInit {
     this.loadWarehouses();
     this.loadPeriods();
     this.loadFormatConfig();
+    this.loadImmutabilityMode();
+  }
+
+  loadImmutabilityMode() {
+    this.procedureService.getImmutabilityMode().subscribe({
+      next: (res) => {
+        if (res?.mode) {
+          this.immutabilityMode = res.mode;
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => console.error('Error cargando modo de inmutabilidad', err)
+    });
+  }
+
+  saveImmutabilityMode() {
+    this.savingImmutability = true;
+    this.procedureService.setImmutabilityMode(this.immutabilityMode).subscribe({
+      next: () => {
+        this.savingImmutability = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Política Guardada',
+          detail: `Política de inmutabilidad establecida en: ${this.immutabilityMode === 'REOPEN' ? 'Reapertura Controlada' : 'Bloqueo Total Permanente'}.`
+        });
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.savingImmutability = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error?.error || 'No se pudo guardar la configuración.'
+        });
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // --- API LOADERS ---
